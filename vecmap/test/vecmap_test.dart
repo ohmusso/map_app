@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'dart:io';
 
@@ -12,8 +14,12 @@ void main() {
   });
 
   test('decode zigzag', () {
-    final decodedParam = GeometryCommand.decodeZigzag(9);
+    var decodedParam = GeometryCommand.decodeZigzag(9);
     expect(decodedParam, -5);
+    decodedParam = GeometryCommand.decodeZigzag(886);
+    expect(decodedParam, 443);
+    decodedParam = GeometryCommand.decodeZigzag(159);
+    expect(decodedParam, -80);
   });
 
   test('read pbf', () {
@@ -23,6 +29,7 @@ void main() {
     final layer = getLayer(tile, 'boundary');
     expect(layer!.name, 'boundary');
 
+    expect(layer.extent, 4096);
     expect(layer.features[0].type, Tile_GeomType.LINESTRING);
 
     printLayers(tile);
@@ -37,6 +44,8 @@ void main() {
 
     final layer = getLayer(tile, 'boundary');
     final geometry = layer!.features[0].geometry;
+    print('${layer.name}, ${layer.keys}, ${layer.values}');
+    print(geometry);
 
     final type = GeometryCommand.getCommandType(geometry[0]);
     final count = GeometryCommand.getCommandCount(geometry[0]);
@@ -44,10 +53,12 @@ void main() {
     expect(type, GeometryCommandType.moveTo);
     expect(count, 1);
 
-    final command = GeometryCommand.newCommands(geometry);
-    expect(command.length, 2);
-    expect(command[0].commandType, GeometryCommandType.moveTo);
-    expect(command[1].commandType, GeometryCommandType.lineTo);
+    final commands = GeometryCommand.newCommands(geometry);
+    expect(commands.length, 2);
+    expect(commands[0].commandType, GeometryCommandType.moveTo);
+    expect(commands[1].commandType, GeometryCommandType.lineTo);
+
+    printCommands(commands);
     // print('command num: ${command.length}');
     // print('command[0]: ${command[0].commandType}');
     // print('${command[0].commandParameters}');

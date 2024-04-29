@@ -43,8 +43,20 @@ class GeometryCommand {
     return commandInteger >> shiftCount;
   }
 
-  static decodeZigzag(int parameterInteger) {
-    return (parameterInteger >> 1) ^ (-(parameterInteger & 1));
+  static int decodeZigzag(int parameterInteger) {
+    // zigzag decode fomula
+    //  - (parameterInteger >> 1) ^ (-(parameterInteger & 1)
+    // can not use xor operator '^'. see bellow.
+    // https://stackoverflow.com/questions/17427976/bitwise-operations-wrong-result-in-dart2js/17433485#17433485
+    final int ret;
+    if ((parameterInteger & 1) == 1) {
+      // bit 0 is 1
+      ret = -(parameterInteger >> 1) - 1;
+    } else {
+      // bit 0 is 0
+      ret = parameterInteger >> 1;
+    }
+    return ret;
   }
 
   static List<GeometryCommand> newCommands(List<int> geometory) {
@@ -113,5 +125,14 @@ void printGeometry(List<int> geometry) {
   for (var geocode in geometry) {
     var hex = geocode.toRadixString(16);
     print('geocode: $hex');
+  }
+}
+
+void printCommands(List<GeometryCommand> commands) {
+  for (var command in commands) {
+    print('command: ${command.commandType}');
+    for (var param in command.commandParameters) {
+      print('param: ${param.x}, ${param.y}');
+    }
   }
 }

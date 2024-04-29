@@ -28,9 +28,10 @@ class _DemoState extends State<Demo> {
 
     Future(() async {
       print('read pbf start');
-      final tile = await getTileFromPbf('11_1796_811.pbf');
+      final Tile tile = await getTileFromPbf('11_1796_811.pbf');
       layers = tile.layers;
       print('read pbf finish');
+
       setState(() {});
     });
 
@@ -40,6 +41,14 @@ class _DemoState extends State<Demo> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget childWidget;
+    if (layers.isEmpty) {
+      childWidget = const Text('loading...');
+    } else {
+      childWidget = CustomPaint(
+        painter: MyPainter(layers),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -50,10 +59,7 @@ class _DemoState extends State<Demo> {
         child: Container(
           color: Colors.white,
           child: SizedBox.expand(
-            child: CustomPaint(
-              // painter: MyPainter(true),
-              painter: MyPainter(layers),
-            ),
+            child: childWidget,
           ),
         ),
       ),
@@ -68,10 +74,6 @@ class MyPainter extends CustomPainter {
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1.0
     ..color = Colors.black26;
-  final Paint _pathPaint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 10.0
-    ..color = Colors.blue;
 
   MyPainter(this.layers);
 
@@ -85,28 +87,24 @@ class MyPainter extends CustomPainter {
 
     // レイヤーを描画
     canvas.save();
-    canvas.scale(0.01, 0.01);
-    Path path = Path();
+    canvas.scale(1.0, 1.0);
     // for (var layer in layers) {
     //   print('draw layter ${layer.name}');
     //   _drawLayer(path, layer);
     // }
-    var layer = layers.where((layer) => layer.name == 'boundary').first;
-    print('draw layer ${layer.name}');
+    var layer = layers.where((layer) => layer.name == 'road').first;
 
     for (var feature in layer.features) {
-      _drawFeature(path, feature);
+      _drawFeature(canvas, feature);
     }
 
-    canvas.drawPath(path, _pathPaint);
     canvas.restore();
   }
 
   /// 地物の描画
-  void _drawFeature(Path path, Tile_Feature feature) {
-    print('feature type ${feature.type}');
-
+  void _drawFeature(Canvas canvas, Tile_Feature feature) {
     final commands = GeometryCommand.newCommands(feature.geometry);
+    Path path = Path();
     Offset offset = const Offset(0.0, 0.0);
 
     for (var command in commands) {
@@ -122,6 +120,12 @@ class MyPainter extends CustomPainter {
         default:
       }
     }
+
+    final Paint pathPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10.0
+      ..color = Color.fromARGB(255, 0, 140, feature.hashCode);
+    canvas.drawPath(path, pathPaint);
   }
 
   Offset _drawGeoMoveTo(Path path, List<Point<int>> cmdParams, Offset offset) {
@@ -130,7 +134,6 @@ class MyPainter extends CustomPainter {
     for (var param in cmdParams) {
       curOffset = curOffset.translate(param.x.toDouble(), param.y.toDouble());
       path.moveTo(curOffset.dx, curOffset.dy);
-      print('offset: $curOffset');
     }
 
     return curOffset;
@@ -142,7 +145,6 @@ class MyPainter extends CustomPainter {
     for (var param in cmdParams) {
       curOffset = curOffset.translate(param.x.toDouble(), param.y.toDouble());
       path.lineTo(curOffset.dx, curOffset.dy);
-      print('offset: $curOffset');
     }
 
     return curOffset;
