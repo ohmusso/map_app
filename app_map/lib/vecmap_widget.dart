@@ -87,21 +87,43 @@ class MyPainter extends CustomPainter {
 
     // レイヤーを描画
     canvas.save();
+    canvas.translate(100, 100); // 余白を作る
     canvas.scale(1.0, 1.0);
     // for (var layer in layers) {
     //   print('draw layter ${layer.name}');
     //   _drawLayer(path, layer);
     // }
-    var layer = layers.where((layer) => layer.name == 'road').first;
+    Tile_Layer layer;
+    layer = layers.where((layer) => layer.name == 'boundary').first;
+    _drawFeatures(canvas, layer.features);
 
-    for (var feature in layer.features) {
-      _drawFeature(canvas, feature);
-    }
+    layer = layers.where((layer) => layer.name == 'road').first;
+    _drawFeatures(canvas, layer.features);
+
+    layer = layers.where((layer) => layer.name == 'railway').first;
+    _drawFeatures(canvas, layer.features);
+
+    // TODO exception occure: No enum value with that id: 6
+    // layer = layers.where((layer) => layer.name == 'coastline').first;
+    // _drawFeatures(canvas, layer.features);
+
+    layer = layers.where((layer) => layer.name == 'river').first;
+    _drawFeatures(canvas, layer.features);
+
+    // TODO exception occure: No enum value with that id: 6
+    // layer = layers.where((layer) => layer.name == 'waterarea').first;
+    // _drawFeatures(canvas, layer.features);
 
     canvas.restore();
   }
 
   /// 地物の描画
+  void _drawFeatures(Canvas canvas, List<Tile_Feature> features) {
+    for (var feature in features) {
+      _drawFeature(canvas, feature);
+    }
+  }
+
   void _drawFeature(Canvas canvas, Tile_Feature feature) {
     final commands = GeometryCommand.newCommands(feature.geometry);
     Path path = Path();
