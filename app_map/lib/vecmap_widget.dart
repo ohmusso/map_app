@@ -87,12 +87,11 @@ class MyPainter extends CustomPainter {
 
     // レイヤーを描画
     canvas.save();
-    canvas.translate(100, 100); // 余白を作る
-    canvas.scale(1.0, 1.0);
-    // for (var layer in layers) {
-    //   print('draw layter ${layer.name}');
-    //   _drawLayer(path, layer);
-    // }
+    const double scale = 0.15;
+    const double offsetTileToCenter = 4096 / 2 * scale;
+    canvas.translate((size.width / 2) - offsetTileToCenter, 20); // 画面中央
+    canvas.scale(scale, scale);
+
     Tile_Layer layer;
     layer = layers.where((layer) => layer.name == 'boundary').first;
     _drawFeatures(canvas, layer.features);
