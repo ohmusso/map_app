@@ -17,7 +17,7 @@ void main() {
   });
 
   test('read pbf', () {
-    File file = File('./assets/11_1796_811.pbf');
+    File file = File('./11_1796_811.pbf');
     Tile tile = Tile.fromBuffer(file.readAsBytesSync());
 
     final layer = getLayer(tile, 'boundary');
@@ -25,12 +25,14 @@ void main() {
 
     expect(layer.features[0].type, Tile_GeomType.LINESTRING);
 
+    printLayers(tile);
+
     final geometry = layer.features[0].geometry;
     printGeometry(geometry);
   });
 
   test('decode geometry', () {
-    File file = File('./assets/11_1796_811.pbf');
+    File file = File('./11_1796_811.pbf');
     Tile tile = Tile.fromBuffer(file.readAsBytesSync());
 
     final layer = getLayer(tile, 'boundary');

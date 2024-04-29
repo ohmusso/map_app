@@ -87,7 +87,6 @@ Tile_Layer? getLayer(Tile tile, String layerName) {
   return null;
 }
 
-// Iterates though all people in the AddressBook and prints info about them.
 void printTile(Tile tile) {
   for (var layer in tile.layers) {
     print('layter name: ${layer.name}');
@@ -95,6 +94,12 @@ void printTile(Tile tile) {
     for (var feature in layer.features) {
       print('\tfeature type: ${feature.type}');
     }
+  }
+}
+
+void printLayers(Tile tile) {
+  for (var layer in tile.layers) {
+    print('layter name: ${layer.name}');
   }
 }
 

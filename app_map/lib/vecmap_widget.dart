@@ -1,4 +1,13 @@
+import 'dart:math';
+import 'package:flutter/services.dart' show rootBundle;
+
 import 'package:flutter/material.dart';
+import 'package:vecmap/vecmap.dart';
+
+Future<Tile> getTileFromPbf(String path) async {
+  final byteData = await rootBundle.load('assets/$path');
+  return Tile.fromBuffer(byteData.buffer.asUint8List());
+}
 
 class Demo extends StatefulWidget {
   const Demo({
@@ -10,6 +19,25 @@ class Demo extends StatefulWidget {
 }
 
 class _DemoState extends State<Demo> {
+  List<Tile_Layer> layers = [];
+  @override
+  void initState() {
+    super.initState();
+
+    print('init state start');
+
+    Future(() async {
+      print('read pbf start');
+      final tile = await getTileFromPbf('11_1796_811.pbf');
+      layers = tile.layers;
+      print('read pbf finish');
+      setState(() {});
+    });
+
+    print('init state finish');
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +51,8 @@ class _DemoState extends State<Demo> {
           color: Colors.white,
           child: SizedBox.expand(
             child: CustomPaint(
-              painter: MyPainter(true),
+              // painter: MyPainter(true),
+              painter: MyPainter(layers),
             ),
           ),
         ),
@@ -33,7 +62,7 @@ class _DemoState extends State<Demo> {
 }
 
 class MyPainter extends CustomPainter {
-  final bool show;
+  final List<Tile_Layer> layers;
   final double space = 20;
   final Paint _gridPint = Paint()
     ..style = PaintingStyle.stroke
@@ -41,28 +70,82 @@ class MyPainter extends CustomPainter {
     ..color = Colors.black26;
   final Paint _pathPaint = Paint()
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.5
-    ..color = Colors.blue.shade200;
+    ..strokeWidth = 10.0
+    ..color = Colors.blue;
 
-  MyPainter(this.show);
+  MyPainter(this.layers);
 
   @override
   void paint(Canvas canvas, Size size) {
     // 原点を画面の中心に設定する
+    canvas.save();
     canvas.translate(size.width / 2, size.height / 2);
-
     _drawGrid(canvas, size);
+    canvas.restore();
 
+    // レイヤーを描画
+    canvas.save();
+    canvas.scale(0.01, 0.01);
     Path path = Path();
-    path
-      ..moveTo(-120, -20) // ペンを(-120,-20)へ移動
-      ..lineTo(-80, -80) // (-120,-20)から(-80, -80)線を描く
-      ..lineTo(-40, -60) // (-80, -80)から(-40, -60)線を描く
-      ..lineTo(0, 0)
-      ..lineTo(40, -140)
-      ..lineTo(80, 120)
-      ..lineTo(120, -100);
+    // for (var layer in layers) {
+    //   print('draw layter ${layer.name}');
+    //   _drawLayer(path, layer);
+    // }
+    var layer = layers.where((layer) => layer.name == 'boundary').first;
+    print('draw layer ${layer.name}');
+
+    for (var feature in layer.features) {
+      _drawFeature(path, feature);
+    }
+
     canvas.drawPath(path, _pathPaint);
+    canvas.restore();
+  }
+
+  /// 地物の描画
+  void _drawFeature(Path path, Tile_Feature feature) {
+    print('feature type ${feature.type}');
+
+    final commands = GeometryCommand.newCommands(feature.geometry);
+    Offset offset = const Offset(0.0, 0.0);
+
+    for (var command in commands) {
+      switch (command.commandType) {
+        case GeometryCommandType.moveTo:
+          offset = _drawGeoMoveTo(path, command.commandParameters, offset);
+          break;
+        case GeometryCommandType.lineTo:
+          offset = _drawGeoLineTo(path, command.commandParameters, offset);
+          break;
+        case GeometryCommandType.closePath:
+          break;
+        default:
+      }
+    }
+  }
+
+  Offset _drawGeoMoveTo(Path path, List<Point<int>> cmdParams, Offset offset) {
+    Offset curOffset = offset;
+
+    for (var param in cmdParams) {
+      curOffset = curOffset.translate(param.x.toDouble(), param.y.toDouble());
+      path.moveTo(curOffset.dx, curOffset.dy);
+      print('offset: $curOffset');
+    }
+
+    return curOffset;
+  }
+
+  Offset _drawGeoLineTo(Path path, List<Point<int>> cmdParams, Offset offset) {
+    Offset curOffset = offset;
+
+    for (var param in cmdParams) {
+      curOffset = curOffset.translate(param.x.toDouble(), param.y.toDouble());
+      path.lineTo(curOffset.dx, curOffset.dy);
+      print('offset: $curOffset');
+    }
+
+    return curOffset;
   }
 
   void _drawGrid(Canvas canvas, Size size) {
