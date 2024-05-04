@@ -226,6 +226,7 @@ TileStyleGroup _$TileStyleGroupFromJson(Map<String, dynamic> json) {
 mixin _$TileStyleGroup {
   String get id => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
+  List<int>? get zoom => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -239,7 +240,7 @@ abstract class $TileStyleGroupCopyWith<$Res> {
           TileStyleGroup value, $Res Function(TileStyleGroup) then) =
       _$TileStyleGroupCopyWithImpl<$Res, TileStyleGroup>;
   @useResult
-  $Res call({String id, String title});
+  $Res call({String id, String title, List<int>? zoom});
 }
 
 /// @nodoc
@@ -257,6 +258,7 @@ class _$TileStyleGroupCopyWithImpl<$Res, $Val extends TileStyleGroup>
   $Res call({
     Object? id = null,
     Object? title = null,
+    Object? zoom = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -267,6 +269,10 @@ class _$TileStyleGroupCopyWithImpl<$Res, $Val extends TileStyleGroup>
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
+      zoom: freezed == zoom
+          ? _value.zoom
+          : zoom // ignore: cast_nullable_to_non_nullable
+              as List<int>?,
     ) as $Val);
   }
 }
@@ -279,7 +285,7 @@ abstract class _$$TileStyleGroupImplCopyWith<$Res>
       __$$TileStyleGroupImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String id, String title});
+  $Res call({String id, String title, List<int>? zoom});
 }
 
 /// @nodoc
@@ -295,6 +301,7 @@ class __$$TileStyleGroupImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? title = null,
+    Object? zoom = freezed,
   }) {
     return _then(_$TileStyleGroupImpl(
       id: null == id
@@ -305,6 +312,10 @@ class __$$TileStyleGroupImplCopyWithImpl<$Res>
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
+      zoom: freezed == zoom
+          ? _value._zoom
+          : zoom // ignore: cast_nullable_to_non_nullable
+              as List<int>?,
     ));
   }
 }
@@ -313,8 +324,10 @@ class __$$TileStyleGroupImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$TileStyleGroupImpl extends _TileStyleGroup
     with DiagnosticableTreeMixin {
-  const _$TileStyleGroupImpl({required this.id, required this.title})
-      : super._();
+  const _$TileStyleGroupImpl(
+      {required this.id, required this.title, required final List<int>? zoom})
+      : _zoom = zoom,
+        super._();
 
   factory _$TileStyleGroupImpl.fromJson(Map<String, dynamic> json) =>
       _$$TileStyleGroupImplFromJson(json);
@@ -323,10 +336,19 @@ class _$TileStyleGroupImpl extends _TileStyleGroup
   final String id;
   @override
   final String title;
+  final List<int>? _zoom;
+  @override
+  List<int>? get zoom {
+    final value = _zoom;
+    if (value == null) return null;
+    if (_zoom is EqualUnmodifiableListView) return _zoom;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'TileStyleGroup(id: $id, title: $title)';
+    return 'TileStyleGroup(id: $id, title: $title, zoom: $zoom)';
   }
 
   @override
@@ -335,7 +357,8 @@ class _$TileStyleGroupImpl extends _TileStyleGroup
     properties
       ..add(DiagnosticsProperty('type', 'TileStyleGroup'))
       ..add(DiagnosticsProperty('id', id))
-      ..add(DiagnosticsProperty('title', title));
+      ..add(DiagnosticsProperty('title', title))
+      ..add(DiagnosticsProperty('zoom', zoom));
   }
 
   @override
@@ -344,12 +367,14 @@ class _$TileStyleGroupImpl extends _TileStyleGroup
         (other.runtimeType == runtimeType &&
             other is _$TileStyleGroupImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.title, title) || other.title == title));
+            (identical(other.title, title) || other.title == title) &&
+            const DeepCollectionEquality().equals(other._zoom, _zoom));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, title);
+  int get hashCode => Object.hash(
+      runtimeType, id, title, const DeepCollectionEquality().hash(_zoom));
 
   @JsonKey(ignore: true)
   @override
@@ -369,7 +394,8 @@ class _$TileStyleGroupImpl extends _TileStyleGroup
 abstract class _TileStyleGroup extends TileStyleGroup {
   const factory _TileStyleGroup(
       {required final String id,
-      required final String title}) = _$TileStyleGroupImpl;
+      required final String title,
+      required final List<int>? zoom}) = _$TileStyleGroupImpl;
   const _TileStyleGroup._() : super._();
 
   factory _TileStyleGroup.fromJson(Map<String, dynamic> json) =
@@ -379,6 +405,8 @@ abstract class _TileStyleGroup extends TileStyleGroup {
   String get id;
   @override
   String get title;
+  @override
+  List<int>? get zoom;
   @override
   @JsonKey(ignore: true)
   _$$TileStyleGroupImplCopyWith<_$TileStyleGroupImpl> get copyWith =>

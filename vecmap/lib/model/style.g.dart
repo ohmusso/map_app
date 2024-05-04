@@ -28,6 +28,9 @@ _$TileStyleGroupImpl _$$TileStyleGroupImplFromJson(Map<String, dynamic> json) =>
     _$TileStyleGroupImpl(
       id: json['id'] as String,
       title: json['title'] as String,
+      zoom: (json['zoom'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList(),
     );
 
 Map<String, dynamic> _$$TileStyleGroupImplToJson(
@@ -35,6 +38,7 @@ Map<String, dynamic> _$$TileStyleGroupImplToJson(
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
+      'zoom': instance.zoom,
     };
 
 _$TileStyleItemImpl _$$TileStyleItemImplFromJson(Map<String, dynamic> json) =>

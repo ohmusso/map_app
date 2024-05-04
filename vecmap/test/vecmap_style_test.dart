@@ -19,6 +19,16 @@ void main() {
     print(style.list);
   });
 
+  test('read group from json', () async {
+    expect(
+        TileStyleGroup.fromJson(<String, dynamic>{
+          'id': 'back',
+          'title': '道路等より下に描画',
+          'zoom': [1, 2, 3],
+        }),
+        TileStyleGroup(id: 'back', title: '道路等より下に描画', zoom: [1, 2, 3]));
+  });
+
   test('read directory from json', () async {
     expect(
       TileStyleElement.fromJson(<String, dynamic>{

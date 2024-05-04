@@ -11,7 +11,6 @@ class TileStyle with _$TileStyle {
     required String title,
     required List<TileStyleGroup> group,
     required List<TileStyleElement> list,
-    // required String list,
   }) = _TileStyle;
 
   factory TileStyle.fromJson(Map<String, dynamic> json) =>
@@ -24,6 +23,7 @@ class TileStyleGroup with _$TileStyleGroup {
   const factory TileStyleGroup({
     required String id,
     required String title,
+    required List<int>? zoom,
   }) = _TileStyleGroup;
 
   factory TileStyleGroup.fromJson(Map<String, dynamic> json) =>
