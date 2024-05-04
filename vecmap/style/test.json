@@ -1,0 +1,148 @@
+{
+    "title": "標準地図",
+    "maxNativeZoom": 16,
+    "group": [
+        {
+            "id": "back",
+            "title": "道路等より下に描画"
+        },
+        {
+            "id": "building",
+            "title": "建物",
+            "zoom": [
+                4,
+                5,
+                6,
+                17
+            ]
+        },
+        {
+            "id": "boundary-group",
+            "title": "行政界",
+            "zoom": [
+                5,
+                6,
+                7,
+                8,
+                17,
+                18
+            ]
+        }
+   ],
+    "list": [
+        {
+            "type": "item",
+            "title": "水域",
+            "zIndex": 3,
+            "group": [
+                "back"
+            ]
+        },
+        {
+            "type": "layer",
+            "title": "水域",
+            "zIndex": 3,
+            "group": [
+                "back"
+            ]
+        },
+        {
+            "type": "layer",
+            "minzoom": 14,
+            "maxzoom": 16,
+            "filter": [
+                "all",
+                [
+                    "in",
+                    "ftCode",
+                    8201
+                ],
+                [
+                    "==",
+                    "snglDbl",
+                    1
+                ],
+                [
+                    "in",
+                    "railState",
+                    0,
+                    200
+                ],
+                [
+                    "any",
+                    [
+                        "==",
+                        "staCode",
+                        "0"
+                    ],
+                    [
+                        "!has",
+                        "staCode"
+                    ]
+                ],
+                [
+                    "any",
+                    [
+                        "all",
+                        [
+                            ">=",
+                            "rtCode1",
+                            "40203000000"
+                        ],
+                        [
+                            "<",
+                            "rtCode1",
+                            "40204000000"
+                        ]
+                    ],
+                    [
+                        "all",
+                        [
+                            ">=",
+                            "rtCode",
+                            "40203000000"
+                        ],
+                        [
+                            "<",
+                            "rtCode",
+                            "40204000000"
+                        ]
+                    ]
+                ]
+            ],
+            "list": [
+                {
+                    "type": "line",
+                    "source-layer": "railway",
+                    "info": {
+                        "type": "line"
+                    },
+                    "draw": {
+                        "line-cap": "square",
+                        "line-color": "rgba(100,100,100,1)",
+                        "line-width": 3,
+                        "line-visible": true
+                    }
+                },
+                {
+                    "type": "line",
+                    "source-layer": "railway",
+                    "info": {
+                        "type": "line"
+                    },
+                    "draw": {
+                        "line-cap": "butt",
+                        "line-color": "rgba(100,100,100,1)",
+                        "line-width": 8,
+                        "line-dasharray": [
+                            0.1,
+                            5
+                        ],
+                        "line-visible": true
+                    }
+                }
+            ],
+            "visible": true
+        }
+    ]
+}

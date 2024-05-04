@@ -23,3 +23,9 @@ dart run bin/dartproto.dart 811.pbf
 ## png
 
 <https://cyberjapandata.gsi.go.jp/xyz/std/11/1796/811.png>
+
+## freezed
+
+``` powershell
+flutter pub run build_runner watch
+```

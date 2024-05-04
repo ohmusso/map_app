@@ -1,0 +1,244 @@
+{
+    "title": "標準地図",
+    "maxNativeZoom": 16,
+    "group": [
+        {
+            "id": "back",
+            "title": "道路等より下に描画"
+        },
+        {
+            "id": "building",
+            "title": "建物",
+            "zoom": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                17
+            ]
+        },
+        {
+            "id": "building-back",
+            "title": "building-back",
+            "zoom": [
+                14,
+                15,
+                16
+            ],
+            "additional-filter": [
+                "any",
+                [
+                    "==",
+                    "lvOrder",
+                    0
+                ],
+                [
+                    "!has",
+                    "lvOrder"
+                ]
+            ]
+        },
+        {
+            "id": "boundary-group",
+            "title": "行政界",
+            "zoom": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18
+            ]
+        },
+        {
+            "id": "road-outline",
+            "title": "道路",
+            "zoom": [
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13
+            ],
+            "filter": [
+                [
+                    "==",
+                    "line-role",
+                    "outline"
+                ]
+            ]
+        },
+        {
+            "id": "road-railway-00",
+            "title": "道路-鉄道",
+            "hasOutline": true,
+            "zoom": [
+                14,
+                15,
+                16
+            ]
+        },
+        {
+            "id": "road-railway-bridge-00",
+            "title": "道路-鉄道-橋",
+            "hasOutline": true,
+            "zoom": [
+                14,
+                15,
+                16
+            ]
+        },
+        {
+            "id": "road-front",
+            "title": "road-front",
+            "zoom": [
+                14,
+                15,
+                16
+            ]
+        },
+        {
+            "id": "road12-14-1",
+            "title": "都道府県道12-14",
+            "zoom": [
+                8,
+                9,
+                10,
+                11,
+                12,
+                13
+            ]
+        },
+        {
+            "id": "road12-14-2",
+            "title": "国道12-14",
+            "zoom": [
+                8,
+                9,
+                10,
+                11,
+                12,
+                13
+            ]
+        },
+        {
+            "id": "railway12-14",
+            "title": "鉄道12-14",
+            "zoom": [
+                8,
+                9,
+                10,
+                11,
+                12,
+                13
+            ]
+        },
+        {
+            "id": "road12-14-3",
+            "title": "高速道路12-14",
+            "zoom": [
+                8,
+                9,
+                10,
+                11,
+                12,
+                13
+            ]
+        },
+        {
+            "id": "railway",
+            "title": "鉄道",
+            "zoom": [
+                4,
+                5,
+                6,
+                7,
+                17
+            ],
+            "filter": [
+                [
+                    "!=",
+                    "line-role",
+                    "outline"
+                ]
+            ]
+        },
+        {
+            "id": "road",
+            "title": "道路",
+            "zoom": [
+                4,
+                5,
+                6,
+                7,
+                17
+            ],
+            "filter": [
+                [
+                    "!=",
+                    "line-role",
+                    "outline"
+                ]
+            ]
+        },
+        {
+            "id": "building-front",
+            "title": "building-front",
+            "zoom": [
+                14,
+                15,
+                16
+            ],
+            "additional-filter": [
+                "==",
+                "lvOrder",
+                4
+            ]
+        },
+        {
+            "id": "front",
+            "title": "人工水路（空間）"
+        },
+        {
+            "id": "symbol",
+            "title": "シンボル"
+        },
+        {
+            "id": "label",
+            "title": "ラベル"
+        },
+        {
+            "id": "gcp",
+            "title": "電子基準点"
+        }
+    ],
+    "list": [
+        {
+            "type": "item",
+            "title": "水域",
+            "zIndex": 3,
+            "group": [
+                "back"
+            ]
+        }
+    ]
+}
