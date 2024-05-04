@@ -34,6 +34,8 @@ class TileStyleGroup with _$TileStyleGroup {
 class TileStyleElement with _$TileStyleElement {
   const factory TileStyleElement.item(
       String title, List<TileStyleElement> list) = TileStyleItem;
+  const factory TileStyleElement.directory(
+      String title, List<TileStyleElement> list) = TileStyleDirectory;
   const factory TileStyleElement.layer(
       String? title, bool? visible, List<TileStyleDraw>? list) = TileStyleLayer;
 

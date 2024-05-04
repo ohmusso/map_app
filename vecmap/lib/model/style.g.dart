@@ -53,6 +53,24 @@ Map<String, dynamic> _$$TileStyleItemImplToJson(_$TileStyleItemImpl instance) =>
       'type': instance.$type,
     };
 
+_$TileStyleDirectoryImpl _$$TileStyleDirectoryImplFromJson(
+        Map<String, dynamic> json) =>
+    _$TileStyleDirectoryImpl(
+      json['title'] as String,
+      (json['list'] as List<dynamic>)
+          .map((e) => TileStyleElement.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      $type: json['type'] as String?,
+    );
+
+Map<String, dynamic> _$$TileStyleDirectoryImplToJson(
+        _$TileStyleDirectoryImpl instance) =>
+    <String, dynamic>{
+      'title': instance.title,
+      'list': instance.list,
+      'type': instance.$type,
+    };
+
 _$TileStyleLayerImpl _$$TileStyleLayerImplFromJson(Map<String, dynamic> json) =>
     _$TileStyleLayerImpl(
       json['title'] as String?,

@@ -19,7 +19,54 @@ void main() {
     print(style.list);
   });
 
-  test('union key json', () async {
+  test('read directory from json', () async {
+    expect(
+      TileStyleElement.fromJson(<String, dynamic>{
+        'type': 'directory',
+        'title': '地形',
+        'list': [
+          {
+            'type': 'directory',
+            'title': 'hogehoge',
+            'list': [
+              {
+                'type': 'item',
+                'title': '水域',
+                'list': [
+                  {'type': 'layer', 'title': '水域'}
+                ]
+              }
+            ]
+          },
+          {
+            'type': 'directory',
+            'title': 'fugafuga',
+            'list': [
+              {
+                'type': 'item',
+                'title': '緑地',
+                'list': [
+                  {'type': 'layer', 'title': '緑地'}
+                ]
+              }
+            ]
+          }
+        ]
+      }),
+      TileStyleElement.directory('地形', [
+        TileStyleElement.directory('hogehoge', [
+          TileStyleElement.item(
+              '水域', [TileStyleElement.layer('水域', null, null)])
+        ]),
+        TileStyleElement.directory('fugafuga', [
+          TileStyleElement.item(
+              '緑地', [TileStyleElement.layer('緑地', null, null)])
+        ])
+      ]),
+    );
+  });
+
+  test('read item from json', () async {
     expect(
         TileStyleElement.fromJson(<String, dynamic>{
           'type': 'item',
@@ -30,7 +77,9 @@ void main() {
         }),
         TileStyleElement.item(
             '水域', [TileStyleElement.layer('水域', null, null)]));
+  });
 
+  test('read layer from json', () async {
     expect(
       TileStyleElement.fromJson(<String, dynamic>{
         'type': 'layer',
@@ -61,49 +110,5 @@ void main() {
     );
 
     print(TileStyleElement.layer('42', false, null));
-  });
-
-  test('read pbf', () {
-    // File file = File('./11_1796_811.pbf');
-    // Tile tile = Tile.fromBuffer(file.readAsBytesSync());
-
-    // final layer = getLayer(tile, 'boundary');
-    // expect(layer!.name, 'boundary');
-
-    // expect(layer.extent, 4096);
-    // expect(layer.features[0].type, Tile_GeomType.LINESTRING);
-
-    // printLayers(tile);
-
-    // final geometry = layer.features[0].geometry;
-    // printGeometry(geometry);
-  });
-
-  test('decode geometry', () {
-    // File file = File('./11_1796_811.pbf');
-    // Tile tile = Tile.fromBuffer(file.readAsBytesSync());
-
-    // final layer = getLayer(tile, 'boundary');
-    // final geometry = layer!.features[0].geometry;
-    // print('${layer.name}, ${layer.keys}, ${layer.values}');
-    // print(geometry);
-
-    // final type = GeometryCommand.getCommandType(geometry[0]);
-    // final count = GeometryCommand.getCommandCount(geometry[0]);
-
-    // expect(type, GeometryCommandType.moveTo);
-    // expect(count, 1);
-
-    // final commands = GeometryCommand.newCommands(geometry);
-    // expect(commands.length, 2);
-    // expect(commands[0].commandType, GeometryCommandType.moveTo);
-    // expect(commands[1].commandType, GeometryCommandType.lineTo);
-
-    // printCommands(commands);
-    // // print('command num: ${command.length}');
-    // // print('command[0]: ${command[0].commandType}');
-    // // print('${command[0].commandParameters}');
-    // // print('command[1]: ${command[1].commandType}');
-    // // print('${command[1].commandParameters}');
   });
 }

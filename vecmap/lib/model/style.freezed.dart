@@ -389,6 +389,8 @@ TileStyleElement _$TileStyleElementFromJson(Map<String, dynamic> json) {
   switch (json['type']) {
     case 'item':
       return TileStyleItem.fromJson(json);
+    case 'directory':
+      return TileStyleDirectory.fromJson(json);
     case 'layer':
       return TileStyleLayer.fromJson(json);
 
@@ -405,6 +407,8 @@ mixin _$TileStyleElement {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String title, List<TileStyleElement> list) item,
+    required TResult Function(String title, List<TileStyleElement> list)
+        directory,
     required TResult Function(
             String? title, bool? visible, List<TileStyleDraw>? list)
         layer,
@@ -413,6 +417,7 @@ mixin _$TileStyleElement {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String title, List<TileStyleElement> list)? item,
+    TResult? Function(String title, List<TileStyleElement> list)? directory,
     TResult? Function(String? title, bool? visible, List<TileStyleDraw>? list)?
         layer,
   }) =>
@@ -420,6 +425,7 @@ mixin _$TileStyleElement {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String title, List<TileStyleElement> list)? item,
+    TResult Function(String title, List<TileStyleElement> list)? directory,
     TResult Function(String? title, bool? visible, List<TileStyleDraw>? list)?
         layer,
     required TResult orElse(),
@@ -428,18 +434,21 @@ mixin _$TileStyleElement {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(TileStyleItem value) item,
+    required TResult Function(TileStyleDirectory value) directory,
     required TResult Function(TileStyleLayer value) layer,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(TileStyleItem value)? item,
+    TResult? Function(TileStyleDirectory value)? directory,
     TResult? Function(TileStyleLayer value)? layer,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(TileStyleItem value)? item,
+    TResult Function(TileStyleDirectory value)? directory,
     TResult Function(TileStyleLayer value)? layer,
     required TResult orElse(),
   }) =>
@@ -585,6 +594,8 @@ class _$TileStyleItemImpl
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String title, List<TileStyleElement> list) item,
+    required TResult Function(String title, List<TileStyleElement> list)
+        directory,
     required TResult Function(
             String? title, bool? visible, List<TileStyleDraw>? list)
         layer,
@@ -596,6 +607,7 @@ class _$TileStyleItemImpl
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String title, List<TileStyleElement> list)? item,
+    TResult? Function(String title, List<TileStyleElement> list)? directory,
     TResult? Function(String? title, bool? visible, List<TileStyleDraw>? list)?
         layer,
   }) {
@@ -606,6 +618,7 @@ class _$TileStyleItemImpl
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String title, List<TileStyleElement> list)? item,
+    TResult Function(String title, List<TileStyleElement> list)? directory,
     TResult Function(String? title, bool? visible, List<TileStyleDraw>? list)?
         layer,
     required TResult orElse(),
@@ -620,6 +633,7 @@ class _$TileStyleItemImpl
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(TileStyleItem value) item,
+    required TResult Function(TileStyleDirectory value) directory,
     required TResult Function(TileStyleLayer value) layer,
   }) {
     return item(this);
@@ -629,6 +643,7 @@ class _$TileStyleItemImpl
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(TileStyleItem value)? item,
+    TResult? Function(TileStyleDirectory value)? directory,
     TResult? Function(TileStyleLayer value)? layer,
   }) {
     return item?.call(this);
@@ -638,6 +653,7 @@ class _$TileStyleItemImpl
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(TileStyleItem value)? item,
+    TResult Function(TileStyleDirectory value)? directory,
     TResult Function(TileStyleLayer value)? layer,
     required TResult orElse(),
   }) {
@@ -670,6 +686,204 @@ abstract class TileStyleItem implements TileStyleElement {
   @override
   @JsonKey(ignore: true)
   _$$TileStyleItemImplCopyWith<_$TileStyleItemImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$TileStyleDirectoryImplCopyWith<$Res>
+    implements $TileStyleElementCopyWith<$Res> {
+  factory _$$TileStyleDirectoryImplCopyWith(_$TileStyleDirectoryImpl value,
+          $Res Function(_$TileStyleDirectoryImpl) then) =
+      __$$TileStyleDirectoryImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String title, List<TileStyleElement> list});
+}
+
+/// @nodoc
+class __$$TileStyleDirectoryImplCopyWithImpl<$Res>
+    extends _$TileStyleElementCopyWithImpl<$Res, _$TileStyleDirectoryImpl>
+    implements _$$TileStyleDirectoryImplCopyWith<$Res> {
+  __$$TileStyleDirectoryImplCopyWithImpl(_$TileStyleDirectoryImpl _value,
+      $Res Function(_$TileStyleDirectoryImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? title = null,
+    Object? list = null,
+  }) {
+    return _then(_$TileStyleDirectoryImpl(
+      null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      null == list
+          ? _value._list
+          : list // ignore: cast_nullable_to_non_nullable
+              as List<TileStyleElement>,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$TileStyleDirectoryImpl
+    with DiagnosticableTreeMixin
+    implements TileStyleDirectory {
+  const _$TileStyleDirectoryImpl(this.title, final List<TileStyleElement> list,
+      {final String? $type})
+      : _list = list,
+        $type = $type ?? 'directory';
+
+  factory _$TileStyleDirectoryImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TileStyleDirectoryImplFromJson(json);
+
+  @override
+  final String title;
+  final List<TileStyleElement> _list;
+  @override
+  List<TileStyleElement> get list {
+    if (_list is EqualUnmodifiableListView) return _list;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_list);
+  }
+
+  @JsonKey(name: 'type')
+  final String $type;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'TileStyleElement.directory(title: $title, list: $list)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'TileStyleElement.directory'))
+      ..add(DiagnosticsProperty('title', title))
+      ..add(DiagnosticsProperty('list', list));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$TileStyleDirectoryImpl &&
+            (identical(other.title, title) || other.title == title) &&
+            const DeepCollectionEquality().equals(other._list, _list));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, title, const DeepCollectionEquality().hash(_list));
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$TileStyleDirectoryImplCopyWith<_$TileStyleDirectoryImpl> get copyWith =>
+      __$$TileStyleDirectoryImplCopyWithImpl<_$TileStyleDirectoryImpl>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String title, List<TileStyleElement> list) item,
+    required TResult Function(String title, List<TileStyleElement> list)
+        directory,
+    required TResult Function(
+            String? title, bool? visible, List<TileStyleDraw>? list)
+        layer,
+  }) {
+    return directory(title, list);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String title, List<TileStyleElement> list)? item,
+    TResult? Function(String title, List<TileStyleElement> list)? directory,
+    TResult? Function(String? title, bool? visible, List<TileStyleDraw>? list)?
+        layer,
+  }) {
+    return directory?.call(title, list);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String title, List<TileStyleElement> list)? item,
+    TResult Function(String title, List<TileStyleElement> list)? directory,
+    TResult Function(String? title, bool? visible, List<TileStyleDraw>? list)?
+        layer,
+    required TResult orElse(),
+  }) {
+    if (directory != null) {
+      return directory(title, list);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(TileStyleItem value) item,
+    required TResult Function(TileStyleDirectory value) directory,
+    required TResult Function(TileStyleLayer value) layer,
+  }) {
+    return directory(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(TileStyleItem value)? item,
+    TResult? Function(TileStyleDirectory value)? directory,
+    TResult? Function(TileStyleLayer value)? layer,
+  }) {
+    return directory?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(TileStyleItem value)? item,
+    TResult Function(TileStyleDirectory value)? directory,
+    TResult Function(TileStyleLayer value)? layer,
+    required TResult orElse(),
+  }) {
+    if (directory != null) {
+      return directory(this);
+    }
+    return orElse();
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$TileStyleDirectoryImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class TileStyleDirectory implements TileStyleElement {
+  const factory TileStyleDirectory(
+          final String title, final List<TileStyleElement> list) =
+      _$TileStyleDirectoryImpl;
+
+  factory TileStyleDirectory.fromJson(Map<String, dynamic> json) =
+      _$TileStyleDirectoryImpl.fromJson;
+
+  @override
+  String get title;
+  @override
+  List<TileStyleElement> get list;
+  @override
+  @JsonKey(ignore: true)
+  _$$TileStyleDirectoryImplCopyWith<_$TileStyleDirectoryImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -788,6 +1002,8 @@ class _$TileStyleLayerImpl
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String title, List<TileStyleElement> list) item,
+    required TResult Function(String title, List<TileStyleElement> list)
+        directory,
     required TResult Function(
             String? title, bool? visible, List<TileStyleDraw>? list)
         layer,
@@ -799,6 +1015,7 @@ class _$TileStyleLayerImpl
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String title, List<TileStyleElement> list)? item,
+    TResult? Function(String title, List<TileStyleElement> list)? directory,
     TResult? Function(String? title, bool? visible, List<TileStyleDraw>? list)?
         layer,
   }) {
@@ -809,6 +1026,7 @@ class _$TileStyleLayerImpl
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String title, List<TileStyleElement> list)? item,
+    TResult Function(String title, List<TileStyleElement> list)? directory,
     TResult Function(String? title, bool? visible, List<TileStyleDraw>? list)?
         layer,
     required TResult orElse(),
@@ -823,6 +1041,7 @@ class _$TileStyleLayerImpl
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(TileStyleItem value) item,
+    required TResult Function(TileStyleDirectory value) directory,
     required TResult Function(TileStyleLayer value) layer,
   }) {
     return layer(this);
@@ -832,6 +1051,7 @@ class _$TileStyleLayerImpl
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(TileStyleItem value)? item,
+    TResult? Function(TileStyleDirectory value)? directory,
     TResult? Function(TileStyleLayer value)? layer,
   }) {
     return layer?.call(this);
@@ -841,6 +1061,7 @@ class _$TileStyleLayerImpl
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(TileStyleItem value)? item,
+    TResult Function(TileStyleDirectory value)? directory,
     TResult Function(TileStyleLayer value)? layer,
     required TResult orElse(),
   }) {
