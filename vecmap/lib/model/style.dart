@@ -34,9 +34,23 @@ class TileStyleGroup with _$TileStyleGroup {
 class TileStyleElement with _$TileStyleElement {
   const factory TileStyleElement.item(
       String title, List<TileStyleElement> list) = TileStyleItem;
-  const factory TileStyleElement.layer(String? title, bool? visible) =
-      TileStyleLayer;
+  const factory TileStyleElement.layer(
+      String? title, bool? visible, List<TileStyleDraw>? list) = TileStyleLayer;
 
   factory TileStyleElement.fromJson(Map<String, dynamic> json) =>
       _$TileStyleElementFromJson(json);
+}
+
+@freezed
+class TileStyleDraw with _$TileStyleDraw {
+  const TileStyleDraw._();
+  const factory TileStyleDraw({
+    required String type,
+    required bool? visible,
+    @JsonKey(name: 'source-layer') required String? sourceLayer,
+    required Map<String, dynamic> draw,
+  }) = _TileStyleDraw;
+
+  factory TileStyleDraw.fromJson(Map<String, dynamic> json) =>
+      _$TileStyleDrawFromJson(json);
 }

@@ -57,6 +57,9 @@ _$TileStyleLayerImpl _$$TileStyleLayerImplFromJson(Map<String, dynamic> json) =>
     _$TileStyleLayerImpl(
       json['title'] as String?,
       json['visible'] as bool?,
+      (json['list'] as List<dynamic>?)
+          ?.map((e) => TileStyleDraw.fromJson(e as Map<String, dynamic>))
+          .toList(),
       $type: json['type'] as String?,
     );
 
@@ -65,5 +68,22 @@ Map<String, dynamic> _$$TileStyleLayerImplToJson(
     <String, dynamic>{
       'title': instance.title,
       'visible': instance.visible,
+      'list': instance.list,
       'type': instance.$type,
+    };
+
+_$TileStyleDrawImpl _$$TileStyleDrawImplFromJson(Map<String, dynamic> json) =>
+    _$TileStyleDrawImpl(
+      type: json['type'] as String,
+      visible: json['visible'] as bool?,
+      sourceLayer: json['source-layer'] as String?,
+      draw: json['draw'] as Map<String, dynamic>,
+    );
+
+Map<String, dynamic> _$$TileStyleDrawImplToJson(_$TileStyleDrawImpl instance) =>
+    <String, dynamic>{
+      'type': instance.type,
+      'visible': instance.visible,
+      'source-layer': instance.sourceLayer,
+      'draw': instance.draw,
     };

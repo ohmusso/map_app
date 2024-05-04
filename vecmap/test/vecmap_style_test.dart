@@ -28,18 +28,39 @@ void main() {
             {'type': 'layer', 'title': '水域'}
           ]
         }),
-        TileStyleElement.item('水域', [TileStyleElement.layer('水域', null)]));
+        TileStyleElement.item(
+            '水域', [TileStyleElement.layer('水域', null, null)]));
 
     expect(
       TileStyleElement.fromJson(<String, dynamic>{
         'type': 'layer',
         'title': '道路',
         'visible': true,
+        'list': [
+          {
+            'type': 'fill',
+            'visible': true,
+            'source-layer': "hogehoge",
+            'draw': {
+              'fill-color': 'red',
+              'fill-style': 'fill',
+            }
+          }
+        ]
       }),
-      TileStyleElement.layer('道路', true),
+      TileStyleElement.layer('道路', true, [
+        TileStyleDraw(
+            type: 'fill',
+            visible: true,
+            sourceLayer: 'hogehoge',
+            draw: {
+              'fill-color': 'red',
+              'fill-style': 'fill',
+            })
+      ]),
     );
 
-    print(TileStyleElement.layer('42', false));
+    print(TileStyleElement.layer('42', false, null));
   });
 
   test('read pbf', () {
