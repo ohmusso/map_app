@@ -4,8 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vecmap/model/style.dart';
 import 'dart:io';
 
-import 'package:vecmap/vecmap_style.dart';
-
 Future<String> loadJsonString(String path) async {
   final File file = File(path);
   return await file.readAsString();
@@ -18,27 +16,30 @@ void main() {
     final style = TileStyle.fromJson(json);
     expect(style.title, '標準地図');
     print(style.group);
+    print(style.list);
   });
 
   test('union key json', () async {
     expect(
-      CustomKey.fromJson(<String, dynamic>{
-        'type': 'item',
-        'title': '水域',
-      }),
-      CustomKey.item('水域'),
-    );
+        TileStyleElement.fromJson(<String, dynamic>{
+          'type': 'item',
+          'title': '水域',
+          'list': [
+            {'type': 'layer', 'title': '水域'}
+          ]
+        }),
+        TileStyleElement.item('水域', [TileStyleElement.layer('水域', null)]));
 
     expect(
-      CustomKey.fromJson(<String, dynamic>{
+      TileStyleElement.fromJson(<String, dynamic>{
         'type': 'layer',
         'title': '道路',
         'visible': true,
       }),
-      CustomKey.layer('道路', true),
+      TileStyleElement.layer('道路', true),
     );
 
-    print(CustomKey.layer('42', false));
+    print(TileStyleElement.layer('42', false));
   });
 
   test('read pbf', () {

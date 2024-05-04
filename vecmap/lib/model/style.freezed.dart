@@ -22,6 +22,7 @@ TileStyle _$TileStyleFromJson(Map<String, dynamic> json) {
 mixin _$TileStyle {
   String get title => throw _privateConstructorUsedError;
   List<TileStyleGroup> get group => throw _privateConstructorUsedError;
+  List<TileStyleElement> get list => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -34,7 +35,8 @@ abstract class $TileStyleCopyWith<$Res> {
   factory $TileStyleCopyWith(TileStyle value, $Res Function(TileStyle) then) =
       _$TileStyleCopyWithImpl<$Res, TileStyle>;
   @useResult
-  $Res call({String title, List<TileStyleGroup> group});
+  $Res call(
+      {String title, List<TileStyleGroup> group, List<TileStyleElement> list});
 }
 
 /// @nodoc
@@ -52,6 +54,7 @@ class _$TileStyleCopyWithImpl<$Res, $Val extends TileStyle>
   $Res call({
     Object? title = null,
     Object? group = null,
+    Object? list = null,
   }) {
     return _then(_value.copyWith(
       title: null == title
@@ -62,6 +65,10 @@ class _$TileStyleCopyWithImpl<$Res, $Val extends TileStyle>
           ? _value.group
           : group // ignore: cast_nullable_to_non_nullable
               as List<TileStyleGroup>,
+      list: null == list
+          ? _value.list
+          : list // ignore: cast_nullable_to_non_nullable
+              as List<TileStyleElement>,
     ) as $Val);
   }
 }
@@ -74,7 +81,8 @@ abstract class _$$TileStyleImplCopyWith<$Res>
       __$$TileStyleImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String title, List<TileStyleGroup> group});
+  $Res call(
+      {String title, List<TileStyleGroup> group, List<TileStyleElement> list});
 }
 
 /// @nodoc
@@ -90,6 +98,7 @@ class __$$TileStyleImplCopyWithImpl<$Res>
   $Res call({
     Object? title = null,
     Object? group = null,
+    Object? list = null,
   }) {
     return _then(_$TileStyleImpl(
       title: null == title
@@ -100,16 +109,23 @@ class __$$TileStyleImplCopyWithImpl<$Res>
           ? _value._group
           : group // ignore: cast_nullable_to_non_nullable
               as List<TileStyleGroup>,
+      list: null == list
+          ? _value._list
+          : list // ignore: cast_nullable_to_non_nullable
+              as List<TileStyleElement>,
     ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$TileStyleImpl extends _TileStyle {
+class _$TileStyleImpl extends _TileStyle with DiagnosticableTreeMixin {
   const _$TileStyleImpl(
-      {required this.title, required final List<TileStyleGroup> group})
+      {required this.title,
+      required final List<TileStyleGroup> group,
+      required final List<TileStyleElement> list})
       : _group = group,
+        _list = list,
         super._();
 
   factory _$TileStyleImpl.fromJson(Map<String, dynamic> json) =>
@@ -125,9 +141,27 @@ class _$TileStyleImpl extends _TileStyle {
     return EqualUnmodifiableListView(_group);
   }
 
+  final List<TileStyleElement> _list;
   @override
-  String toString() {
-    return 'TileStyle(title: $title, group: $group)';
+  List<TileStyleElement> get list {
+    if (_list is EqualUnmodifiableListView) return _list;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_list);
+  }
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'TileStyle(title: $title, group: $group, list: $list)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'TileStyle'))
+      ..add(DiagnosticsProperty('title', title))
+      ..add(DiagnosticsProperty('group', group))
+      ..add(DiagnosticsProperty('list', list));
   }
 
   @override
@@ -136,13 +170,17 @@ class _$TileStyleImpl extends _TileStyle {
         (other.runtimeType == runtimeType &&
             other is _$TileStyleImpl &&
             (identical(other.title, title) || other.title == title) &&
-            const DeepCollectionEquality().equals(other._group, _group));
+            const DeepCollectionEquality().equals(other._group, _group) &&
+            const DeepCollectionEquality().equals(other._list, _list));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-      runtimeType, title, const DeepCollectionEquality().hash(_group));
+      runtimeType,
+      title,
+      const DeepCollectionEquality().hash(_group),
+      const DeepCollectionEquality().hash(_list));
 
   @JsonKey(ignore: true)
   @override
@@ -161,7 +199,8 @@ class _$TileStyleImpl extends _TileStyle {
 abstract class _TileStyle extends TileStyle {
   const factory _TileStyle(
       {required final String title,
-      required final List<TileStyleGroup> group}) = _$TileStyleImpl;
+      required final List<TileStyleGroup> group,
+      required final List<TileStyleElement> list}) = _$TileStyleImpl;
   const _TileStyle._() : super._();
 
   factory _TileStyle.fromJson(Map<String, dynamic> json) =
@@ -171,6 +210,8 @@ abstract class _TileStyle extends TileStyle {
   String get title;
   @override
   List<TileStyleGroup> get group;
+  @override
+  List<TileStyleElement> get list;
   @override
   @JsonKey(ignore: true)
   _$$TileStyleImplCopyWith<_$TileStyleImpl> get copyWith =>
@@ -270,7 +311,8 @@ class __$$TileStyleGroupImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$TileStyleGroupImpl extends _TileStyleGroup {
+class _$TileStyleGroupImpl extends _TileStyleGroup
+    with DiagnosticableTreeMixin {
   const _$TileStyleGroupImpl({required this.id, required this.title})
       : super._();
 
@@ -283,8 +325,17 @@ class _$TileStyleGroupImpl extends _TileStyleGroup {
   final String title;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'TileStyleGroup(id: $id, title: $title)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'TileStyleGroup'))
+      ..add(DiagnosticsProperty('id', id))
+      ..add(DiagnosticsProperty('title', title));
   }
 
   @override
@@ -334,78 +385,79 @@ abstract class _TileStyleGroup extends TileStyleGroup {
       throw _privateConstructorUsedError;
 }
 
-CustomKey _$CustomKeyFromJson(Map<String, dynamic> json) {
+TileStyleElement _$TileStyleElementFromJson(Map<String, dynamic> json) {
   switch (json['type']) {
     case 'item':
-      return _CustomKeyItem.fromJson(json);
+      return TileStyleItem.fromJson(json);
     case 'layer':
-      return _CustomKeyLayer.fromJson(json);
+      return TileStyleLayer.fromJson(json);
 
     default:
-      throw CheckedFromJsonException(
-          json, 'type', 'CustomKey', 'Invalid union type "${json['type']}"!');
+      throw CheckedFromJsonException(json, 'type', 'TileStyleElement',
+          'Invalid union type "${json['type']}"!');
   }
 }
 
 /// @nodoc
-mixin _$CustomKey {
-  String get title => throw _privateConstructorUsedError;
+mixin _$TileStyleElement {
+  String? get title => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(String title) item,
-    required TResult Function(String title, bool visible) layer,
+    required TResult Function(String title, List<TileStyleElement> list) item,
+    required TResult Function(String? title, bool? visible) layer,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(String title)? item,
-    TResult? Function(String title, bool visible)? layer,
+    TResult? Function(String title, List<TileStyleElement> list)? item,
+    TResult? Function(String? title, bool? visible)? layer,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(String title)? item,
-    TResult Function(String title, bool visible)? layer,
+    TResult Function(String title, List<TileStyleElement> list)? item,
+    TResult Function(String? title, bool? visible)? layer,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_CustomKeyItem value) item,
-    required TResult Function(_CustomKeyLayer value) layer,
+    required TResult Function(TileStyleItem value) item,
+    required TResult Function(TileStyleLayer value) layer,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_CustomKeyItem value)? item,
-    TResult? Function(_CustomKeyLayer value)? layer,
+    TResult? Function(TileStyleItem value)? item,
+    TResult? Function(TileStyleLayer value)? layer,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_CustomKeyItem value)? item,
-    TResult Function(_CustomKeyLayer value)? layer,
+    TResult Function(TileStyleItem value)? item,
+    TResult Function(TileStyleLayer value)? layer,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $CustomKeyCopyWith<CustomKey> get copyWith =>
+  $TileStyleElementCopyWith<TileStyleElement> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $CustomKeyCopyWith<$Res> {
-  factory $CustomKeyCopyWith(CustomKey value, $Res Function(CustomKey) then) =
-      _$CustomKeyCopyWithImpl<$Res, CustomKey>;
+abstract class $TileStyleElementCopyWith<$Res> {
+  factory $TileStyleElementCopyWith(
+          TileStyleElement value, $Res Function(TileStyleElement) then) =
+      _$TileStyleElementCopyWithImpl<$Res, TileStyleElement>;
   @useResult
   $Res call({String title});
 }
 
 /// @nodoc
-class _$CustomKeyCopyWithImpl<$Res, $Val extends CustomKey>
-    implements $CustomKeyCopyWith<$Res> {
-  _$CustomKeyCopyWithImpl(this._value, this._then);
+class _$TileStyleElementCopyWithImpl<$Res, $Val extends TileStyleElement>
+    implements $TileStyleElementCopyWith<$Res> {
+  _$TileStyleElementCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
@@ -419,7 +471,7 @@ class _$CustomKeyCopyWithImpl<$Res, $Val extends CustomKey>
   }) {
     return _then(_value.copyWith(
       title: null == title
-          ? _value.title
+          ? _value.title!
           : title // ignore: cast_nullable_to_non_nullable
               as String,
     ) as $Val);
@@ -427,103 +479,130 @@ class _$CustomKeyCopyWithImpl<$Res, $Val extends CustomKey>
 }
 
 /// @nodoc
-abstract class _$$CustomKeyItemImplCopyWith<$Res>
-    implements $CustomKeyCopyWith<$Res> {
-  factory _$$CustomKeyItemImplCopyWith(
-          _$CustomKeyItemImpl value, $Res Function(_$CustomKeyItemImpl) then) =
-      __$$CustomKeyItemImplCopyWithImpl<$Res>;
+abstract class _$$TileStyleItemImplCopyWith<$Res>
+    implements $TileStyleElementCopyWith<$Res> {
+  factory _$$TileStyleItemImplCopyWith(
+          _$TileStyleItemImpl value, $Res Function(_$TileStyleItemImpl) then) =
+      __$$TileStyleItemImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String title});
+  $Res call({String title, List<TileStyleElement> list});
 }
 
 /// @nodoc
-class __$$CustomKeyItemImplCopyWithImpl<$Res>
-    extends _$CustomKeyCopyWithImpl<$Res, _$CustomKeyItemImpl>
-    implements _$$CustomKeyItemImplCopyWith<$Res> {
-  __$$CustomKeyItemImplCopyWithImpl(
-      _$CustomKeyItemImpl _value, $Res Function(_$CustomKeyItemImpl) _then)
+class __$$TileStyleItemImplCopyWithImpl<$Res>
+    extends _$TileStyleElementCopyWithImpl<$Res, _$TileStyleItemImpl>
+    implements _$$TileStyleItemImplCopyWith<$Res> {
+  __$$TileStyleItemImplCopyWithImpl(
+      _$TileStyleItemImpl _value, $Res Function(_$TileStyleItemImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? title = null,
+    Object? list = null,
   }) {
-    return _then(_$CustomKeyItemImpl(
+    return _then(_$TileStyleItemImpl(
       null == title
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
+      null == list
+          ? _value._list
+          : list // ignore: cast_nullable_to_non_nullable
+              as List<TileStyleElement>,
     ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$CustomKeyItemImpl implements _CustomKeyItem {
-  const _$CustomKeyItemImpl(this.title, {final String? $type})
-      : $type = $type ?? 'item';
+class _$TileStyleItemImpl
+    with DiagnosticableTreeMixin
+    implements TileStyleItem {
+  const _$TileStyleItemImpl(this.title, final List<TileStyleElement> list,
+      {final String? $type})
+      : _list = list,
+        $type = $type ?? 'item';
 
-  factory _$CustomKeyItemImpl.fromJson(Map<String, dynamic> json) =>
-      _$$CustomKeyItemImplFromJson(json);
+  factory _$TileStyleItemImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TileStyleItemImplFromJson(json);
 
   @override
   final String title;
+  final List<TileStyleElement> _list;
+  @override
+  List<TileStyleElement> get list {
+    if (_list is EqualUnmodifiableListView) return _list;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_list);
+  }
 
   @JsonKey(name: 'type')
   final String $type;
 
   @override
-  String toString() {
-    return 'CustomKey.item(title: $title)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'TileStyleElement.item(title: $title, list: $list)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'TileStyleElement.item'))
+      ..add(DiagnosticsProperty('title', title))
+      ..add(DiagnosticsProperty('list', list));
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$CustomKeyItemImpl &&
-            (identical(other.title, title) || other.title == title));
+            other is _$TileStyleItemImpl &&
+            (identical(other.title, title) || other.title == title) &&
+            const DeepCollectionEquality().equals(other._list, _list));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, title);
+  int get hashCode => Object.hash(
+      runtimeType, title, const DeepCollectionEquality().hash(_list));
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$CustomKeyItemImplCopyWith<_$CustomKeyItemImpl> get copyWith =>
-      __$$CustomKeyItemImplCopyWithImpl<_$CustomKeyItemImpl>(this, _$identity);
+  _$$TileStyleItemImplCopyWith<_$TileStyleItemImpl> get copyWith =>
+      __$$TileStyleItemImplCopyWithImpl<_$TileStyleItemImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(String title) item,
-    required TResult Function(String title, bool visible) layer,
+    required TResult Function(String title, List<TileStyleElement> list) item,
+    required TResult Function(String? title, bool? visible) layer,
   }) {
-    return item(title);
+    return item(title, list);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(String title)? item,
-    TResult? Function(String title, bool visible)? layer,
+    TResult? Function(String title, List<TileStyleElement> list)? item,
+    TResult? Function(String? title, bool? visible)? layer,
   }) {
-    return item?.call(title);
+    return item?.call(title, list);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(String title)? item,
-    TResult Function(String title, bool visible)? layer,
+    TResult Function(String title, List<TileStyleElement> list)? item,
+    TResult Function(String? title, bool? visible)? layer,
     required TResult orElse(),
   }) {
     if (item != null) {
-      return item(title);
+      return item(title, list);
     }
     return orElse();
   }
@@ -531,8 +610,8 @@ class _$CustomKeyItemImpl implements _CustomKeyItem {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_CustomKeyItem value) item,
-    required TResult Function(_CustomKeyLayer value) layer,
+    required TResult Function(TileStyleItem value) item,
+    required TResult Function(TileStyleLayer value) layer,
   }) {
     return item(this);
   }
@@ -540,8 +619,8 @@ class _$CustomKeyItemImpl implements _CustomKeyItem {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_CustomKeyItem value)? item,
-    TResult? Function(_CustomKeyLayer value)? layer,
+    TResult? Function(TileStyleItem value)? item,
+    TResult? Function(TileStyleLayer value)? layer,
   }) {
     return item?.call(this);
   }
@@ -549,8 +628,8 @@ class _$CustomKeyItemImpl implements _CustomKeyItem {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_CustomKeyItem value)? item,
-    TResult Function(_CustomKeyLayer value)? layer,
+    TResult Function(TileStyleItem value)? item,
+    TResult Function(TileStyleLayer value)? layer,
     required TResult orElse(),
   }) {
     if (item != null) {
@@ -561,91 +640,105 @@ class _$CustomKeyItemImpl implements _CustomKeyItem {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$CustomKeyItemImplToJson(
+    return _$$TileStyleItemImplToJson(
       this,
     );
   }
 }
 
-abstract class _CustomKeyItem implements CustomKey {
-  const factory _CustomKeyItem(final String title) = _$CustomKeyItemImpl;
+abstract class TileStyleItem implements TileStyleElement {
+  const factory TileStyleItem(
+          final String title, final List<TileStyleElement> list) =
+      _$TileStyleItemImpl;
 
-  factory _CustomKeyItem.fromJson(Map<String, dynamic> json) =
-      _$CustomKeyItemImpl.fromJson;
+  factory TileStyleItem.fromJson(Map<String, dynamic> json) =
+      _$TileStyleItemImpl.fromJson;
 
   @override
   String get title;
+  List<TileStyleElement> get list;
   @override
   @JsonKey(ignore: true)
-  _$$CustomKeyItemImplCopyWith<_$CustomKeyItemImpl> get copyWith =>
+  _$$TileStyleItemImplCopyWith<_$TileStyleItemImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$CustomKeyLayerImplCopyWith<$Res>
-    implements $CustomKeyCopyWith<$Res> {
-  factory _$$CustomKeyLayerImplCopyWith(_$CustomKeyLayerImpl value,
-          $Res Function(_$CustomKeyLayerImpl) then) =
-      __$$CustomKeyLayerImplCopyWithImpl<$Res>;
+abstract class _$$TileStyleLayerImplCopyWith<$Res>
+    implements $TileStyleElementCopyWith<$Res> {
+  factory _$$TileStyleLayerImplCopyWith(_$TileStyleLayerImpl value,
+          $Res Function(_$TileStyleLayerImpl) then) =
+      __$$TileStyleLayerImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String title, bool visible});
+  $Res call({String? title, bool? visible});
 }
 
 /// @nodoc
-class __$$CustomKeyLayerImplCopyWithImpl<$Res>
-    extends _$CustomKeyCopyWithImpl<$Res, _$CustomKeyLayerImpl>
-    implements _$$CustomKeyLayerImplCopyWith<$Res> {
-  __$$CustomKeyLayerImplCopyWithImpl(
-      _$CustomKeyLayerImpl _value, $Res Function(_$CustomKeyLayerImpl) _then)
+class __$$TileStyleLayerImplCopyWithImpl<$Res>
+    extends _$TileStyleElementCopyWithImpl<$Res, _$TileStyleLayerImpl>
+    implements _$$TileStyleLayerImplCopyWith<$Res> {
+  __$$TileStyleLayerImplCopyWithImpl(
+      _$TileStyleLayerImpl _value, $Res Function(_$TileStyleLayerImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? title = null,
-    Object? visible = null,
+    Object? title = freezed,
+    Object? visible = freezed,
   }) {
-    return _then(_$CustomKeyLayerImpl(
-      null == title
+    return _then(_$TileStyleLayerImpl(
+      freezed == title
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      null == visible
+              as String?,
+      freezed == visible
           ? _value.visible
           : visible // ignore: cast_nullable_to_non_nullable
-              as bool,
+              as bool?,
     ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$CustomKeyLayerImpl implements _CustomKeyLayer {
-  const _$CustomKeyLayerImpl(this.title, this.visible, {final String? $type})
+class _$TileStyleLayerImpl
+    with DiagnosticableTreeMixin
+    implements TileStyleLayer {
+  const _$TileStyleLayerImpl(this.title, this.visible, {final String? $type})
       : $type = $type ?? 'layer';
 
-  factory _$CustomKeyLayerImpl.fromJson(Map<String, dynamic> json) =>
-      _$$CustomKeyLayerImplFromJson(json);
+  factory _$TileStyleLayerImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TileStyleLayerImplFromJson(json);
 
   @override
-  final String title;
+  final String? title;
   @override
-  final bool visible;
+  final bool? visible;
 
   @JsonKey(name: 'type')
   final String $type;
 
   @override
-  String toString() {
-    return 'CustomKey.layer(title: $title, visible: $visible)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'TileStyleElement.layer(title: $title, visible: $visible)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'TileStyleElement.layer'))
+      ..add(DiagnosticsProperty('title', title))
+      ..add(DiagnosticsProperty('visible', visible));
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$CustomKeyLayerImpl &&
+            other is _$TileStyleLayerImpl &&
             (identical(other.title, title) || other.title == title) &&
             (identical(other.visible, visible) || other.visible == visible));
   }
@@ -657,15 +750,15 @@ class _$CustomKeyLayerImpl implements _CustomKeyLayer {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$CustomKeyLayerImplCopyWith<_$CustomKeyLayerImpl> get copyWith =>
-      __$$CustomKeyLayerImplCopyWithImpl<_$CustomKeyLayerImpl>(
+  _$$TileStyleLayerImplCopyWith<_$TileStyleLayerImpl> get copyWith =>
+      __$$TileStyleLayerImplCopyWithImpl<_$TileStyleLayerImpl>(
           this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(String title) item,
-    required TResult Function(String title, bool visible) layer,
+    required TResult Function(String title, List<TileStyleElement> list) item,
+    required TResult Function(String? title, bool? visible) layer,
   }) {
     return layer(title, visible);
   }
@@ -673,8 +766,8 @@ class _$CustomKeyLayerImpl implements _CustomKeyLayer {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(String title)? item,
-    TResult? Function(String title, bool visible)? layer,
+    TResult? Function(String title, List<TileStyleElement> list)? item,
+    TResult? Function(String? title, bool? visible)? layer,
   }) {
     return layer?.call(title, visible);
   }
@@ -682,8 +775,8 @@ class _$CustomKeyLayerImpl implements _CustomKeyLayer {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(String title)? item,
-    TResult Function(String title, bool visible)? layer,
+    TResult Function(String title, List<TileStyleElement> list)? item,
+    TResult Function(String? title, bool? visible)? layer,
     required TResult orElse(),
   }) {
     if (layer != null) {
@@ -695,8 +788,8 @@ class _$CustomKeyLayerImpl implements _CustomKeyLayer {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_CustomKeyItem value) item,
-    required TResult Function(_CustomKeyLayer value) layer,
+    required TResult Function(TileStyleItem value) item,
+    required TResult Function(TileStyleLayer value) layer,
   }) {
     return layer(this);
   }
@@ -704,8 +797,8 @@ class _$CustomKeyLayerImpl implements _CustomKeyLayer {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_CustomKeyItem value)? item,
-    TResult? Function(_CustomKeyLayer value)? layer,
+    TResult? Function(TileStyleItem value)? item,
+    TResult? Function(TileStyleLayer value)? layer,
   }) {
     return layer?.call(this);
   }
@@ -713,8 +806,8 @@ class _$CustomKeyLayerImpl implements _CustomKeyLayer {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_CustomKeyItem value)? item,
-    TResult Function(_CustomKeyLayer value)? layer,
+    TResult Function(TileStyleItem value)? item,
+    TResult Function(TileStyleLayer value)? layer,
     required TResult orElse(),
   }) {
     if (layer != null) {
@@ -725,24 +818,24 @@ class _$CustomKeyLayerImpl implements _CustomKeyLayer {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$CustomKeyLayerImplToJson(
+    return _$$TileStyleLayerImplToJson(
       this,
     );
   }
 }
 
-abstract class _CustomKeyLayer implements CustomKey {
-  const factory _CustomKeyLayer(final String title, final bool visible) =
-      _$CustomKeyLayerImpl;
+abstract class TileStyleLayer implements TileStyleElement {
+  const factory TileStyleLayer(final String? title, final bool? visible) =
+      _$TileStyleLayerImpl;
 
-  factory _CustomKeyLayer.fromJson(Map<String, dynamic> json) =
-      _$CustomKeyLayerImpl.fromJson;
+  factory TileStyleLayer.fromJson(Map<String, dynamic> json) =
+      _$TileStyleLayerImpl.fromJson;
 
   @override
-  String get title;
-  bool get visible;
+  String? get title;
+  bool? get visible;
   @override
   @JsonKey(ignore: true)
-  _$$CustomKeyLayerImplCopyWith<_$CustomKeyLayerImpl> get copyWith =>
+  _$$TileStyleLayerImplCopyWith<_$TileStyleLayerImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

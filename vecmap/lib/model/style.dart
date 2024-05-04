@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'style.freezed.dart';
@@ -9,6 +10,7 @@ class TileStyle with _$TileStyle {
   const factory TileStyle({
     required String title,
     required List<TileStyleGroup> group,
+    required List<TileStyleElement> list,
     // required String list,
   }) = _TileStyle;
 
@@ -29,10 +31,12 @@ class TileStyleGroup with _$TileStyleGroup {
 }
 
 @Freezed(unionKey: 'type')
-class CustomKey with _$CustomKey {
-  const factory CustomKey.item(String title) = _CustomKeyItem;
-  const factory CustomKey.layer(String title, bool visible) = _CustomKeyLayer;
+class TileStyleElement with _$TileStyleElement {
+  const factory TileStyleElement.item(
+      String title, List<TileStyleElement> list) = TileStyleItem;
+  const factory TileStyleElement.layer(String? title, bool? visible) =
+      TileStyleLayer;
 
-  factory CustomKey.fromJson(Map<String, dynamic> json) =>
-      _$CustomKeyFromJson(json);
+  factory TileStyleElement.fromJson(Map<String, dynamic> json) =>
+      _$TileStyleElementFromJson(json);
 }

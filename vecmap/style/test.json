@@ -36,6 +36,16 @@
             "zIndex": 3,
             "group": [
                 "back"
+            ],
+            "list": [
+                {
+                    "type": "layer",
+                    "title": "水域",
+                    "zIndex": 3,
+                    "group": [
+                        "back"
+                    ]
+                }
             ]
         },
         {
