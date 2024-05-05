@@ -24,6 +24,7 @@ class TileStyleGroup with _$TileStyleGroup {
     required String id,
     required String title,
     required List<int>? zoom,
+    required List<dynamic>? filter,
   }) = _TileStyleGroup;
 
   factory TileStyleGroup.fromJson(Map<String, dynamic> json) =>

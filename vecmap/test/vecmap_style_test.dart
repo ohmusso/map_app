@@ -25,8 +25,17 @@ void main() {
           'id': 'back',
           'title': '道路等より下に描画',
           'zoom': [1, 2, 3],
+          'filter': [
+            ["==", "line-role", "outline"]
+          ]
         }),
-        TileStyleGroup(id: 'back', title: '道路等より下に描画', zoom: [1, 2, 3]));
+        TileStyleGroup(id: 'back', title: '道路等より下に描画', zoom: [
+          1,
+          2,
+          3
+        ], filter: [
+          ['==', "line-role", "outline"]
+        ]));
   });
 
   test('read directory from json', () async {
