@@ -41,19 +41,22 @@
                 {
                     "type": "layer",
                     "title": "水域",
-                    "zIndex": 3,
-                    "group": [
-                        "back"
+                    "minzoom": 14,
+                    "maxzoom": 16,
+                    "list": [
+                        {
+                        "type": "fill",
+                        "source-layer": "waterarea",
+                        "info": {
+                            "type": "fill"
+                        },
+                        "draw": {
+                                "fill-color": "rgb(190,210,255)",
+                                "fill-visible": true
+                            }
+                        }
                     ]
                 }
-            ]
-        },
-        {
-            "type": "layer",
-            "title": "水域",
-            "zIndex": 3,
-            "group": [
-                "back"
             ]
         },
         {
@@ -153,6 +156,218 @@
                 }
             ],
             "visible": true
+        },
+        {
+            "type": "directory",
+            "title": "高層建物",
+            "list": [
+                {
+                    "type":"item",
+                    "title":"高層建物",
+                    "group":[
+                      "building",
+                      "building-back",
+                      "building-front"
+                  ],
+                    "list":[
+                    {
+                        "type":"layer",
+                        "minzoom":13,
+                        "maxzoom":13,
+                        "filter":[
+                          "all",
+                          [
+                            "in",
+                            "ftCode",
+                            3103
+                        ],
+                          [
+                            "==",
+                            "$type",
+                            "Polygon"
+                        ]
+                      ],
+                        "list":[
+                        {
+                            "type":"fill",
+                            "source-layer":"building",
+                            "info":{
+                              "type":"fill"
+                          },
+                            "draw":{
+                              "fill-color":"rgb(255,230,190)",
+                              "fill-style":"fill",
+                              "fill-hatch-bgcolor":"rgba(255,255,255,1)",
+                              "fill-visible":true,
+                              "outline-visible":false
+                          }
+                        }
+                      ],
+                        "visible":true
+                    },
+                      {
+                        "type":"layer",
+                        "minzoom":14,
+                        "maxzoom":16,
+                        "filter":[
+                          "all",
+                          [
+                            "in",
+                            "ftCode",
+                            3103
+                        ],
+                          [
+                            "==",
+                            "$type",
+                            "Polygon"
+                        ]
+                      ],
+                        "list":[
+                        {
+                            "type":"fill",
+                            "source-layer":"building",
+                            "info":{
+                              "type":"fill"
+                          },
+                            "draw":{
+                              "fill-color":"rgb(255,135,75)",
+                              "fill-style":"cross",
+                              "fill-hatch-bgcolor":"rgba(255,255,255,1)",
+                              "fill-visible":true,
+                              "outline-visible":false
+                          }
+                        }
+                      ],
+                        "visible":true
+                    },
+                      {
+                        "type":"layer",
+                        "minzoom":17,
+                        "maxzoom":17,
+                        "filter":[
+                          "all",
+                          [
+                            "in",
+                            "ftCode",
+                            3103
+                        ],
+                          [
+                            "==",
+                            "$type",
+                            "Polygon"
+                        ]
+                      ],
+                        "list":[
+                        {
+                            "type":"fill",
+                            "source-layer":"building",
+                            "info":{
+                              "type":"fill"
+                          },
+                            "draw":{
+                              "fill-color":"rgb(255,135,75)",
+                              "fill-style":"cross",
+                              "fill-hatch-bgcolor":"rgba(255,255,255,1)",
+                              "fill-visible":true,
+                              "outline-visible":false
+                          }
+                        }
+                      ],
+                        "visible":true
+                    }
+                  ]
+                },
+                  {
+                    "type":"item",
+                    "title":"高層建物（外周線）",
+                    "group":[
+                      "building",
+                      "building-back",
+                      "building-front"
+                  ],
+                    "list":[
+                    {
+                        "type":"layer",
+                        "minzoom":14,
+                        "maxzoom":16,
+                        "filter":[
+                          "all",
+                          [
+                            "in",
+                            "ftCode",
+                            3103
+                        ],
+                          [
+                            "==",
+                            "$type",
+                            "LineString"
+                        ]
+                      ],
+                        "list":[
+                        {
+                            "type":"line",
+                            "source-layer":"building",
+                            "info":{
+                              "type":"line"
+                          },
+                            "draw":{
+                              "line-color":"rgb(255,135,75)",
+                              "line-cap":"butt",
+                              "line-visible":true,
+                              "line-width":{
+                                "stops":[
+                                [
+                                  14,
+                                    1
+                                ],
+                                  [
+                                  17,
+                                    3
+                                ]
+                              ]
+                            }
+                          }
+                        }
+                      ],
+                        "visible":true
+                    },
+                      {
+                        "type":"layer",
+                        "minzoom":17,
+                        "maxzoom":17,
+                        "filter":[
+                          "all",
+                          [
+                            "in",
+                            "ftCode",
+                            3103
+                        ],
+                          [
+                            "==",
+                            "$type",
+                            "LineString"
+                        ]
+                      ],
+                        "list":[
+                        {
+                            "type":"line",
+                            "source-layer":"building",
+                            "info":{
+                              "type":"line"
+                          },
+                            "draw":{
+                              "line-color":"rgb(255,135,75)",
+                              "line-cap":"butt",
+                              "line-visible":true,
+                              "line-width":2.5
+                          }
+                        }
+                      ],
+                        "visible":true
+                    }
+                  ]
+                }                
+            ]
         }
     ]
 }

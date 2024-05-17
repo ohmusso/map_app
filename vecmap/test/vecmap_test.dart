@@ -1,16 +1,18 @@
+import 'dart:convert';
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'dart:io';
 
 import 'package:vecmap/vecmap.dart';
+import 'package:vecmap/model/style.dart';
+
+String _loadJsonString(String path) {
+  final File file = File(path);
+  return file.readAsStringSync();
+}
 
 void main() {
-  test('adds one to input values', () {
-    final calculator = Calculator();
-    expect(calculator.addOne(2), 3);
-    expect(calculator.addOne(-7), -6);
-    expect(calculator.addOne(0), 1);
-  });
-
   test('decode zigzag', () {
     var decodedParam = GeometryCommand.decodeZigzag(9);
     expect(decodedParam, -5);
@@ -62,5 +64,51 @@ void main() {
     // print('${command[0].commandParameters}');
     // print('command[1]: ${command[1].commandType}');
     // print('${command[1].commandParameters}');
+  });
+
+  test('print feature', () {
+    File file = File('./11_1796_811.pbf');
+    Tile tile = Tile.fromBuffer(file.readAsBytesSync());
+
+    final layer = getLayer(tile, 'transp');
+
+    if (layer == null) {
+      return;
+    }
+
+    print('${layer.name}, ${layer.keys}, ${layer.values}');
+
+    for (var feature in layer.features) {
+      /// tags format
+      /// [d0, d1, d2, d3, ...]
+      ///   |   |   |   | - index of layer.values
+      ///   |   |   | - index of layer.keys
+      ///   |   | - index of layer.values
+      ///   | - index of layer.keys
+      print('${feature.id}, ${feature.tags}');
+    }
+  });
+
+  test('DrawStyleGenerator', () {
+    final jsonString = _loadJsonString('./style/test.json');
+    final json = jsonDecode(jsonString);
+    final style = TileStyle.fromJson(json);
+
+    final generator = DrawDataGenerator(style);
+    final drawStyles = generator.genDrawStyles();
+    print(drawStyles['高層建物']);
+  });
+
+  test('convert string color', () {
+    String str;
+    Color color;
+
+    str = 'rgba(10,20,30,0.5)';
+    color = DrawStyle.convertColorFromStr(str);
+    expect(color, Color.fromRGBO(10, 20, 30, 0.5));
+
+    str = 'rgb(0,1,255)';
+    color = DrawStyle.convertColorFromStr(str);
+    expect(color, Color.fromRGBO(0, 1, 255, 1.0));
   });
 }

@@ -1,15 +1,12 @@
 library vecmap;
 
 import 'dart:math';
+import 'dart:ui';
+
+import 'package:vecmap/model/style.dart';
 
 import 'proto/vectile/vector_tile.pb.dart';
 export 'proto/vectile/vector_tile.pb.dart';
-
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
 
 enum GeometryCommandType {
   moveTo(name: 'MoveTo', id: 1),
@@ -87,6 +84,115 @@ class GeometryCommand {
 
   final GeometryCommandType commandType;
   final List<Point<int>> commandParameters;
+}
+
+class DrawDataGenerator {
+  final TileStyle tileStyle;
+
+  DrawDataGenerator(this.tileStyle);
+
+  Map<String, List<DrawStyle>> genDrawStyles() {
+    final mapNameItem = getItemNamesFromStyle(tileStyle);
+    final mapDrawStyles = Map<String, List<DrawStyle>>.new();
+    for (var nameItem in mapNameItem.entries) {
+      final List<DrawStyle> drawStyles = List.empty(growable: true);
+      for (var layerElement in nameItem.value.list) {
+        final layer = layerElement as TileStyleLayer;
+        final draws = getTileStyleDrawFromLayer(layer);
+
+        for (var draw in draws) {
+          drawStyles
+              .add(DrawStyle(draw, ZoomLevel(layer.minzoom, layer.maxzoom)));
+        }
+      }
+
+      mapDrawStyles[nameItem.key] = drawStyles;
+    }
+
+    return mapDrawStyles;
+  }
+}
+
+const Color _fallbackColor = Color.fromARGB(100, 100, 100, 100);
+
+class DrawStyle {
+  final Color color;
+  final ZoomLevel zoomLevel;
+
+  factory DrawStyle(
+    TileStyleDraw draw,
+    ZoomLevel zoomLevel,
+  ) {
+    final Color color;
+    switch (draw.type) {
+      case 'fill':
+        color = convertColorFromStr(draw.draw['fill-color']);
+        break;
+      case 'line':
+        color = convertColorFromStr(draw.draw['line-color']);
+        break;
+      case 'symbol':
+        color = _fallbackColor;
+        break;
+      default:
+        color = _fallbackColor;
+        break;
+    }
+    return DrawStyle._(color, zoomLevel);
+  }
+
+  DrawStyle._(this.color, this.zoomLevel);
+  DrawStyle.fallback(this.color, this.zoomLevel);
+
+  /// <https://docs.mapbox.com/style-spec/reference/types/#color>
+  static Color convertColorFromStr(String? str) {
+    if (str == null) {
+      return _fallbackColor;
+    }
+
+    final Color color;
+    if (str.contains('rgba')) {
+      /// ex) 'rgba(100,100,100,0.5)'
+      final List<String> strColorValues =
+          str.substring(5, str.indexOf(')')).split(',');
+      final int r = int.parse(strColorValues[0]);
+      final int g = int.parse(strColorValues[1]);
+      final int b = int.parse(strColorValues[2]);
+      final double opacity = double.parse(strColorValues[3]);
+      color = Color.fromRGBO(r, g, b, opacity);
+    } else if (str.contains('rgb')) {
+      /// ex) 'rgb(100,100,100)'
+      final List<String> strColorValues =
+          str.substring(4, str.indexOf(')')).split(',');
+      final int r = int.parse(strColorValues[0]);
+      final int g = int.parse(strColorValues[1]);
+      final int b = int.parse(strColorValues[2]);
+      final double opacity = 1.0;
+      color = Color.fromRGBO(r, g, b, opacity);
+    } else {
+      color = _fallbackColor;
+    }
+
+    return color;
+  }
+}
+
+class ZoomLevel {
+  final int minzoom;
+  final int maxzoom;
+  ZoomLevel(this.minzoom, this.maxzoom);
+}
+
+class DrawData {
+  final int ftcode;
+  final List<DrawStyle> style;
+  final List<GeometryCommand> commands;
+
+  DrawData(
+    this.ftcode,
+    this.style,
+    this.commands,
+  );
 }
 
 Tile_Layer? getLayer(Tile tile, String layerName) {
