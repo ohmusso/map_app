@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:flutter/material.dart';
@@ -93,7 +94,22 @@ class MyPainter extends CustomPainter {
     canvas.scale(scale, scale);
 
     Tile_Layer? layer;
+    layer = layers.where((layer) => layer.name == 'waterarea').firstOrNull;
+    _drawFeatures(canvas, layer);
+
+    layer = layers.where((layer) => layer.name == 'wstructurea').firstOrNull;
+    _drawFeatures(canvas, layer);
+
     layer = layers.where((layer) => layer.name == 'boundary').firstOrNull;
+    _drawFeatures(canvas, layer);
+
+    layer = layers.where((layer) => layer.name == 'label').firstOrNull;
+    _drawFeatures(canvas, layer);
+
+    layer = layers.where((layer) => layer.name == 'elevation').firstOrNull;
+    _drawFeatures(canvas, layer);
+
+    layer = layers.where((layer) => layer.name == 'river').firstOrNull;
     _drawFeatures(canvas, layer);
 
     layer = layers.where((layer) => layer.name == 'road').firstOrNull;
@@ -102,14 +118,13 @@ class MyPainter extends CustomPainter {
     layer = layers.where((layer) => layer.name == 'railway').firstOrNull;
     _drawFeatures(canvas, layer);
 
-    // TODO exception occure: No enum value with that id: 6
-    layer = layers.where((layer) => layer.name == 'coastline').firstOrNull;
+    layer = layers.where((layer) => layer.name == 'transp').firstOrNull;
     _drawFeatures(canvas, layer);
 
-    layer = layers.where((layer) => layer.name == 'river').firstOrNull;
+    layer = layers.where((layer) => layer.name == 'landforma').firstOrNull;
     _drawFeatures(canvas, layer);
 
-    layer = layers.where((layer) => layer.name == 'waterarea').firstOrNull;
+    layer = layers.where((layer) => layer.name == 'symbol').firstOrNull;
     _drawFeatures(canvas, layer);
 
     canvas.restore();
@@ -129,7 +144,71 @@ class MyPainter extends CustomPainter {
 
   void _drawFeature(Canvas canvas, Tile_Feature feature) {
     final commands = GeometryCommand.newCommands(feature.geometry);
-    Path path = Path();
+    switch (feature.type) {
+      case Tile_GeomType.POINT:
+        _drawPoints(canvas, commands);
+        break;
+      case Tile_GeomType.LINESTRING:
+        _drawStringLine(canvas, commands);
+        break;
+      case Tile_GeomType.POLYGON:
+        _drawPolygon(canvas, commands);
+        break;
+      default:
+    }
+  }
+
+  void _drawPoints(Canvas canvas, List<GeometryCommand> commands) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10.0
+      ..color = Color.fromARGB(255, 0, 140, commands.hashCode);
+
+    for (var command in commands) {
+      if (command.commandType == GeometryCommandType.moveTo) {
+        Offset offset = Offset(0, 0);
+        final offsets = command.commandParameters.map((param) {
+          offset = offset.translate(param.x.toDouble(), param.y.toDouble());
+          return offset;
+        }).toList();
+
+        canvas.drawPoints(PointMode.points, offsets, paint);
+      }
+    }
+  }
+
+  void _drawStringLine(Canvas canvas, List<GeometryCommand> commands) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10.0
+      ..color = Color.fromARGB(255, 0, 140, commands.hashCode);
+    final Path path = Path();
+    Offset offset = const Offset(0.0, 0.0);
+
+    for (var command in commands) {
+      switch (command.commandType) {
+        case GeometryCommandType.moveTo:
+          offset = _drawGeoMoveTo(path, command.commandParameters, offset);
+          break;
+        case GeometryCommandType.lineTo:
+          offset = _drawGeoLineTo(path, command.commandParameters, offset);
+          break;
+        case GeometryCommandType.closePath:
+          // nop
+          break;
+        default:
+      }
+    }
+
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawPolygon(Canvas canvas, List<GeometryCommand> commands) {
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 10.0
+      ..color = Color.fromARGB(255, 0, 140, commands.hashCode);
+    final Path path = Path();
     Offset offset = const Offset(0.0, 0.0);
 
     for (var command in commands) {
@@ -147,34 +226,7 @@ class MyPainter extends CustomPainter {
       }
     }
 
-    final Paint pathPaint;
-    switch (feature.type) {
-      case Tile_GeomType.POINT:
-        pathPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 10.0
-          ..color = Color.fromARGB(255, 0, 140, feature.hashCode);
-        break;
-      case Tile_GeomType.LINESTRING:
-        pathPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 10.0
-          ..color = Color.fromARGB(255, 0, 140, feature.hashCode);
-        break;
-      case Tile_GeomType.POLYGON:
-        pathPaint = Paint()
-          ..style = PaintingStyle.fill
-          ..strokeWidth = 10.0
-          ..color = Colors.cyan;
-        break;
-      default:
-        pathPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 10.0
-          ..color = Color.fromARGB(255, 0, 140, feature.hashCode);
-    }
-
-    canvas.drawPath(path, pathPaint);
+    canvas.drawPath(path, paint);
   }
 
   Offset _drawGeoMoveTo(Path path, List<Point<int>> cmdParams, Offset offset) {
