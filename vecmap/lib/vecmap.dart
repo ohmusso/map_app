@@ -64,19 +64,25 @@ class GeometryCommand {
       final count = getCommandCount(geometory[i]);
       i++;
 
-      /* parameters */
-      final params = List<Point<int>>.generate(count, (index) {
-        final geometoryIndex = i + (index * 2);
-        // zigzag decode fomula: ((ParameterInteger >> 1) ^ (-(ParameterInteger & 1)))
-        final dx = decodeZigzag(geometory[geometoryIndex]);
-        final dy = decodeZigzag(geometory[geometoryIndex + 1]);
-        return Point(dx, dy);
-      });
-      i += count * 2;
+      if (type == GeometryCommandType.closePath) {
+        /* new command and add with no parameter */
+        final command = GeometryCommand(type, List<Point<int>>.empty());
+        commands.add(command);
+      } else {
+        /* parameters */
+        final params = List<Point<int>>.generate(count, (index) {
+          final geometoryIndex = i + (index * 2);
+          // zigzag decode fomula: ((ParameterInteger >> 1) ^ (-(ParameterInteger & 1)))
+          final dx = decodeZigzag(geometory[geometoryIndex]);
+          final dy = decodeZigzag(geometory[geometoryIndex + 1]);
+          return Point(dx, dy);
+        });
+        i += count * 2;
 
-      /* new command and add */
-      final command = GeometryCommand(type, params);
-      commands.add(command);
+        /* new command and add */
+        final command = GeometryCommand(type, params);
+        commands.add(command);
+      }
     }
 
     return commands;

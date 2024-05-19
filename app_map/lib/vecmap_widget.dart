@@ -92,32 +92,36 @@ class MyPainter extends CustomPainter {
     canvas.translate((size.width / 2) - offsetTileToCenter, 20); // 画面中央
     canvas.scale(scale, scale);
 
-    Tile_Layer layer;
-    layer = layers.where((layer) => layer.name == 'boundary').first;
-    _drawFeatures(canvas, layer.features);
+    Tile_Layer? layer;
+    layer = layers.where((layer) => layer.name == 'boundary').firstOrNull;
+    _drawFeatures(canvas, layer);
 
-    layer = layers.where((layer) => layer.name == 'road').first;
-    _drawFeatures(canvas, layer.features);
+    layer = layers.where((layer) => layer.name == 'road').firstOrNull;
+    _drawFeatures(canvas, layer);
 
-    layer = layers.where((layer) => layer.name == 'railway').first;
-    _drawFeatures(canvas, layer.features);
-
-    // TODO exception occure: No enum value with that id: 6
-    // layer = layers.where((layer) => layer.name == 'coastline').first;
-    // _drawFeatures(canvas, layer.features);
-
-    layer = layers.where((layer) => layer.name == 'river').first;
-    _drawFeatures(canvas, layer.features);
+    layer = layers.where((layer) => layer.name == 'railway').firstOrNull;
+    _drawFeatures(canvas, layer);
 
     // TODO exception occure: No enum value with that id: 6
-    // layer = layers.where((layer) => layer.name == 'waterarea').first;
-    // _drawFeatures(canvas, layer.features);
+    layer = layers.where((layer) => layer.name == 'coastline').firstOrNull;
+    _drawFeatures(canvas, layer);
+
+    layer = layers.where((layer) => layer.name == 'river').firstOrNull;
+    _drawFeatures(canvas, layer);
+
+    layer = layers.where((layer) => layer.name == 'waterarea').firstOrNull;
+    _drawFeatures(canvas, layer);
 
     canvas.restore();
   }
 
   /// 地物の描画
-  void _drawFeatures(Canvas canvas, List<Tile_Feature> features) {
+  void _drawFeatures(Canvas canvas, Tile_Layer? layer) {
+    if (layer == null) {
+      return;
+    }
+
+    final features = layer.features;
     for (var feature in features) {
       _drawFeature(canvas, feature);
     }
@@ -137,15 +141,39 @@ class MyPainter extends CustomPainter {
           offset = _drawGeoLineTo(path, command.commandParameters, offset);
           break;
         case GeometryCommandType.closePath:
+          path.close();
           break;
         default:
       }
     }
 
-    final Paint pathPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 10.0
-      ..color = Color.fromARGB(255, 0, 140, feature.hashCode);
+    final Paint pathPaint;
+    switch (feature.type) {
+      case Tile_GeomType.POINT:
+        pathPaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 10.0
+          ..color = Color.fromARGB(255, 0, 140, feature.hashCode);
+        break;
+      case Tile_GeomType.LINESTRING:
+        pathPaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 10.0
+          ..color = Color.fromARGB(255, 0, 140, feature.hashCode);
+        break;
+      case Tile_GeomType.POLYGON:
+        pathPaint = Paint()
+          ..style = PaintingStyle.fill
+          ..strokeWidth = 10.0
+          ..color = Colors.cyan;
+        break;
+      default:
+        pathPaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 10.0
+          ..color = Color.fromARGB(255, 0, 140, feature.hashCode);
+    }
+
     canvas.drawPath(path, pathPaint);
   }
 
