@@ -66,7 +66,7 @@ void main() {
     // print('${command[1].commandParameters}');
   });
 
-  test('print feature', () {
+  test('parse tag', () {
     File file = File('./11_1796_811.pbf');
     Tile tile = Tile.fromBuffer(file.readAsBytesSync());
 
@@ -87,6 +87,9 @@ void main() {
       ///   | - index of layer.keys
       print('${feature.id}, ${feature.tags}');
     }
+
+    final tags = genFeatureTags(layer, layer.features[0]);
+    expect(tags['ftCode']!.intValue.toInt(), 2901);
   });
 
   test('DrawStyleGenerator', () {
@@ -97,6 +100,19 @@ void main() {
     final generator = DrawDataGenerator(style);
     final drawStyles = generator.genDrawStyles();
     print(drawStyles);
+  });
+
+  test('convert string color', () {
+    String str;
+    Color color;
+
+    str = 'rgba(10,20,30,0.5)';
+    color = DrawStyle.convertColorFromStr(str);
+    expect(color, Color.fromRGBO(10, 20, 30, 0.5));
+
+    str = 'rgb(0,1,255)';
+    color = DrawStyle.convertColorFromStr(str);
+    expect(color, Color.fromRGBO(0, 1, 255, 1.0));
   });
 
   test('app test', () async {
@@ -130,18 +146,5 @@ void main() {
 // layer name: transp
 // layer name: landforma
 // layer name: symbol
-  });
-
-  test('convert string color', () {
-    String str;
-    Color color;
-
-    str = 'rgba(10,20,30,0.5)';
-    color = DrawStyle.convertColorFromStr(str);
-    expect(color, Color.fromRGBO(10, 20, 30, 0.5));
-
-    str = 'rgb(0,1,255)';
-    color = DrawStyle.convertColorFromStr(str);
-    expect(color, Color.fromRGBO(0, 1, 255, 1.0));
   });
 }

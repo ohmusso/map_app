@@ -227,6 +227,21 @@ Tile_Layer? getLayer(Tile tile, String layerName) {
   return null;
 }
 
+Map<String, Tile_Value> genFeatureTags(Tile_Layer layer, Tile_Feature feature) {
+  final featureTags = Map<String, Tile_Value>.new();
+  for (int i = 0; i < feature.tags.length;) {
+    final keyIndex = feature.tags[i];
+    i++;
+
+    final valueIndex = feature.tags[i];
+    i++;
+
+    featureTags[layer.keys[keyIndex]] = layer.values[valueIndex];
+  }
+
+  return featureTags;
+}
+
 void printTile(Tile tile) {
   for (var layer in tile.layers) {
     print('layer name: ${layer.name}');
