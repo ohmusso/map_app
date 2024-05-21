@@ -75,11 +75,11 @@ void main() {
       TileStyleElement.directory('地形', [
         TileStyleElement.directory('hogehoge', [
           TileStyleElement.item(
-              '水域', [TileStyleElement.layer('水域', null, 1, 10, null)])
+              '水域', [TileStyleElement.layer('水域', null, 1, 10, null, null)])
         ]),
         TileStyleElement.directory('fugafuga', [
           TileStyleElement.item(
-              '緑地', [TileStyleElement.layer('緑地', null, 1, 10, null)])
+              '緑地', [TileStyleElement.layer('緑地', null, 1, 10, null, null)])
         ])
       ]),
     );
@@ -95,7 +95,7 @@ void main() {
           ]
         }),
         TileStyleElement.item(
-            '水域', [TileStyleElement.layer('水域', null, 1, 10, null)]));
+            '水域', [TileStyleElement.layer('水域', null, 1, 10, null, null)]));
   });
 
   test('read layer from json', () async {
@@ -106,6 +106,7 @@ void main() {
         'visible': true,
         'minzoom': 1,
         'maxzoom': 10,
+        'source-layer': 'hogehoge',
         'list': [
           {
             'type': 'fill',
@@ -118,7 +119,7 @@ void main() {
           }
         ]
       }),
-      TileStyleElement.layer('道路', true, 1, 10, [
+      TileStyleElement.layer('道路', true, 1, 10, 'hogehoge', [
         TileStyleDraw(
             type: 'fill',
             visible: true,
@@ -130,7 +131,7 @@ void main() {
       ]),
     );
 
-    print(TileStyleElement.layer('42', false, 1, 10, null));
+    print(TileStyleElement.layer('42', false, 1, 10, null, null));
   });
 
   test('get item', () async {
@@ -183,7 +184,7 @@ void main() {
   });
 
   test('get draws', () async {
-    final layer = TileStyleElement.layer('道路', true, 1, 10, [
+    final layer = TileStyleElement.layer('道路', true, 1, 10, null, [
       TileStyleDraw(
           type: 'fill',
           visible: true,

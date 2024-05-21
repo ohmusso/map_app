@@ -471,8 +471,13 @@ mixin _$TileStyleElement {
     required TResult Function(String title, List<TileStyleElement> list) item,
     required TResult Function(String title, List<TileStyleElement> list)
         directory,
-    required TResult Function(String? title, bool? visible, int minzoom,
-            int maxzoom, List<TileStyleDraw>? list)
+    required TResult Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
+            List<TileStyleDraw>? list)
         layer,
   }) =>
       throw _privateConstructorUsedError;
@@ -480,7 +485,12 @@ mixin _$TileStyleElement {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String title, List<TileStyleElement> list)? item,
     TResult? Function(String title, List<TileStyleElement> list)? directory,
-    TResult? Function(String? title, bool? visible, int minzoom, int maxzoom,
+    TResult? Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
             List<TileStyleDraw>? list)?
         layer,
   }) =>
@@ -489,7 +499,12 @@ mixin _$TileStyleElement {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String title, List<TileStyleElement> list)? item,
     TResult Function(String title, List<TileStyleElement> list)? directory,
-    TResult Function(String? title, bool? visible, int minzoom, int maxzoom,
+    TResult Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
             List<TileStyleDraw>? list)?
         layer,
     required TResult orElse(),
@@ -660,8 +675,13 @@ class _$TileStyleItemImpl
     required TResult Function(String title, List<TileStyleElement> list) item,
     required TResult Function(String title, List<TileStyleElement> list)
         directory,
-    required TResult Function(String? title, bool? visible, int minzoom,
-            int maxzoom, List<TileStyleDraw>? list)
+    required TResult Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
+            List<TileStyleDraw>? list)
         layer,
   }) {
     return item(title, list);
@@ -672,7 +692,12 @@ class _$TileStyleItemImpl
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String title, List<TileStyleElement> list)? item,
     TResult? Function(String title, List<TileStyleElement> list)? directory,
-    TResult? Function(String? title, bool? visible, int minzoom, int maxzoom,
+    TResult? Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
             List<TileStyleDraw>? list)?
         layer,
   }) {
@@ -684,7 +709,12 @@ class _$TileStyleItemImpl
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String title, List<TileStyleElement> list)? item,
     TResult Function(String title, List<TileStyleElement> list)? directory,
-    TResult Function(String? title, bool? visible, int minzoom, int maxzoom,
+    TResult Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
             List<TileStyleDraw>? list)?
         layer,
     required TResult orElse(),
@@ -860,8 +890,13 @@ class _$TileStyleDirectoryImpl
     required TResult Function(String title, List<TileStyleElement> list) item,
     required TResult Function(String title, List<TileStyleElement> list)
         directory,
-    required TResult Function(String? title, bool? visible, int minzoom,
-            int maxzoom, List<TileStyleDraw>? list)
+    required TResult Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
+            List<TileStyleDraw>? list)
         layer,
   }) {
     return directory(title, list);
@@ -872,7 +907,12 @@ class _$TileStyleDirectoryImpl
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String title, List<TileStyleElement> list)? item,
     TResult? Function(String title, List<TileStyleElement> list)? directory,
-    TResult? Function(String? title, bool? visible, int minzoom, int maxzoom,
+    TResult? Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
             List<TileStyleDraw>? list)?
         layer,
   }) {
@@ -884,7 +924,12 @@ class _$TileStyleDirectoryImpl
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String title, List<TileStyleElement> list)? item,
     TResult Function(String title, List<TileStyleElement> list)? directory,
-    TResult Function(String? title, bool? visible, int minzoom, int maxzoom,
+    TResult Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
             List<TileStyleDraw>? list)?
         layer,
     required TResult orElse(),
@@ -968,6 +1013,7 @@ abstract class _$$TileStyleLayerImplCopyWith<$Res>
       bool? visible,
       int minzoom,
       int maxzoom,
+      @JsonKey(name: 'source-layer') String? sourceLayer,
       List<TileStyleDraw>? list});
 }
 
@@ -986,6 +1032,7 @@ class __$$TileStyleLayerImplCopyWithImpl<$Res>
     Object? visible = freezed,
     Object? minzoom = null,
     Object? maxzoom = null,
+    Object? sourceLayer = freezed,
     Object? list = freezed,
   }) {
     return _then(_$TileStyleLayerImpl(
@@ -1005,6 +1052,10 @@ class __$$TileStyleLayerImplCopyWithImpl<$Res>
           ? _value.maxzoom
           : maxzoom // ignore: cast_nullable_to_non_nullable
               as int,
+      freezed == sourceLayer
+          ? _value.sourceLayer
+          : sourceLayer // ignore: cast_nullable_to_non_nullable
+              as String?,
       freezed == list
           ? _value._list
           : list // ignore: cast_nullable_to_non_nullable
@@ -1018,8 +1069,13 @@ class __$$TileStyleLayerImplCopyWithImpl<$Res>
 class _$TileStyleLayerImpl
     with DiagnosticableTreeMixin
     implements TileStyleLayer {
-  const _$TileStyleLayerImpl(this.title, this.visible, this.minzoom,
-      this.maxzoom, final List<TileStyleDraw>? list,
+  const _$TileStyleLayerImpl(
+      this.title,
+      this.visible,
+      this.minzoom,
+      this.maxzoom,
+      @JsonKey(name: 'source-layer') this.sourceLayer,
+      final List<TileStyleDraw>? list,
       {final String? $type})
       : _list = list,
         $type = $type ?? 'layer';
@@ -1035,6 +1091,9 @@ class _$TileStyleLayerImpl
   final int minzoom;
   @override
   final int maxzoom;
+  @override
+  @JsonKey(name: 'source-layer')
+  final String? sourceLayer;
   final List<TileStyleDraw>? _list;
   @override
   List<TileStyleDraw>? get list {
@@ -1050,7 +1109,7 @@ class _$TileStyleLayerImpl
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'TileStyleElement.layer(title: $title, visible: $visible, minzoom: $minzoom, maxzoom: $maxzoom, list: $list)';
+    return 'TileStyleElement.layer(title: $title, visible: $visible, minzoom: $minzoom, maxzoom: $maxzoom, sourceLayer: $sourceLayer, list: $list)';
   }
 
   @override
@@ -1062,6 +1121,7 @@ class _$TileStyleLayerImpl
       ..add(DiagnosticsProperty('visible', visible))
       ..add(DiagnosticsProperty('minzoom', minzoom))
       ..add(DiagnosticsProperty('maxzoom', maxzoom))
+      ..add(DiagnosticsProperty('sourceLayer', sourceLayer))
       ..add(DiagnosticsProperty('list', list));
   }
 
@@ -1074,13 +1134,15 @@ class _$TileStyleLayerImpl
             (identical(other.visible, visible) || other.visible == visible) &&
             (identical(other.minzoom, minzoom) || other.minzoom == minzoom) &&
             (identical(other.maxzoom, maxzoom) || other.maxzoom == maxzoom) &&
+            (identical(other.sourceLayer, sourceLayer) ||
+                other.sourceLayer == sourceLayer) &&
             const DeepCollectionEquality().equals(other._list, _list));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, title, visible, minzoom, maxzoom,
-      const DeepCollectionEquality().hash(_list));
+      sourceLayer, const DeepCollectionEquality().hash(_list));
 
   @JsonKey(ignore: true)
   @override
@@ -1095,11 +1157,16 @@ class _$TileStyleLayerImpl
     required TResult Function(String title, List<TileStyleElement> list) item,
     required TResult Function(String title, List<TileStyleElement> list)
         directory,
-    required TResult Function(String? title, bool? visible, int minzoom,
-            int maxzoom, List<TileStyleDraw>? list)
+    required TResult Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
+            List<TileStyleDraw>? list)
         layer,
   }) {
-    return layer(title, visible, minzoom, maxzoom, list);
+    return layer(title, visible, minzoom, maxzoom, sourceLayer, list);
   }
 
   @override
@@ -1107,11 +1174,16 @@ class _$TileStyleLayerImpl
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String title, List<TileStyleElement> list)? item,
     TResult? Function(String title, List<TileStyleElement> list)? directory,
-    TResult? Function(String? title, bool? visible, int minzoom, int maxzoom,
+    TResult? Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
             List<TileStyleDraw>? list)?
         layer,
   }) {
-    return layer?.call(title, visible, minzoom, maxzoom, list);
+    return layer?.call(title, visible, minzoom, maxzoom, sourceLayer, list);
   }
 
   @override
@@ -1119,13 +1191,18 @@ class _$TileStyleLayerImpl
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String title, List<TileStyleElement> list)? item,
     TResult Function(String title, List<TileStyleElement> list)? directory,
-    TResult Function(String? title, bool? visible, int minzoom, int maxzoom,
+    TResult Function(
+            String? title,
+            bool? visible,
+            int minzoom,
+            int maxzoom,
+            @JsonKey(name: 'source-layer') String? sourceLayer,
             List<TileStyleDraw>? list)?
         layer,
     required TResult orElse(),
   }) {
     if (layer != null) {
-      return layer(title, visible, minzoom, maxzoom, list);
+      return layer(title, visible, minzoom, maxzoom, sourceLayer, list);
     }
     return orElse();
   }
@@ -1178,6 +1255,7 @@ abstract class TileStyleLayer implements TileStyleElement {
       final bool? visible,
       final int minzoom,
       final int maxzoom,
+      @JsonKey(name: 'source-layer') final String? sourceLayer,
       final List<TileStyleDraw>? list) = _$TileStyleLayerImpl;
 
   factory TileStyleLayer.fromJson(Map<String, dynamic> json) =
@@ -1188,6 +1266,8 @@ abstract class TileStyleLayer implements TileStyleElement {
   bool? get visible;
   int get minzoom;
   int get maxzoom;
+  @JsonKey(name: 'source-layer')
+  String? get sourceLayer;
   @override
   List<TileStyleDraw>? get list;
   @override

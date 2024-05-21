@@ -96,7 +96,40 @@ void main() {
 
     final generator = DrawDataGenerator(style);
     final drawStyles = generator.genDrawStyles();
-    print(drawStyles['高層建物']);
+    print(drawStyles);
+  });
+
+  test('app test', () async {
+    // read style
+    final jsonString = await _loadJsonString('./style/std.json');
+    final json = jsonDecode(jsonString);
+    final style = TileStyle.fromJson(json);
+    final mapNameItem = getItemNamesFromStyle(style);
+    assert(mapNameItem.isNotEmpty);
+    final generator = DrawDataGenerator(style);
+    final drawStyles = generator.genDrawStyles();
+
+    // read pbf
+    File file = File('./11_1796_811.pbf');
+    Tile tile = Tile.fromBuffer(file.readAsBytesSync());
+
+    Tile_Layer? layer;
+    layer = tile.layers.where((layer) => layer.name == 'waterarea').firstOrNull;
+    List<DrawStyle> drawStyle = drawStyles['waterarea']!;
+    assert(layer != null);
+
+// layer name: waterarea
+// layer name: wstructurea
+// layer name: boundary
+// layer name: contour
+// layer name: label
+// layer name: elevation
+// layer name: river
+// layer name: road
+// layer name: railway
+// layer name: transp
+// layer name: landforma
+// layer name: symbol
   });
 
   test('convert string color', () {

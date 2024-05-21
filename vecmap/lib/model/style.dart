@@ -37,8 +37,13 @@ class TileStyleElement with _$TileStyleElement {
       String title, List<TileStyleElement> list) = TileStyleItem;
   const factory TileStyleElement.directory(
       String title, List<TileStyleElement> list) = TileStyleDirectory;
-  const factory TileStyleElement.layer(String? title, bool? visible,
-      int minzoom, int maxzoom, List<TileStyleDraw>? list) = TileStyleLayer;
+  const factory TileStyleElement.layer(
+      String? title,
+      bool? visible,
+      int minzoom,
+      int maxzoom,
+      @JsonKey(name: 'source-layer') String? sourceLayer,
+      List<TileStyleDraw>? list) = TileStyleLayer;
 
   factory TileStyleElement.fromJson(Map<String, dynamic> json) =>
       _$TileStyleElementFromJson(json);

@@ -97,22 +97,38 @@ class DrawDataGenerator {
 
   DrawDataGenerator(this.tileStyle);
 
+  /// key is source-layer
   Map<String, List<DrawStyle>> genDrawStyles() {
     final mapNameItem = getItemNamesFromStyle(tileStyle);
     final mapDrawStyles = Map<String, List<DrawStyle>>.new();
+    String layerName = '';
+
     for (var nameItem in mapNameItem.entries) {
-      final List<DrawStyle> drawStyles = List.empty(growable: true);
       for (var layerElement in nameItem.value.list) {
         final layer = layerElement as TileStyleLayer;
         final draws = getTileStyleDrawFromLayer(layer);
+        if (layer.sourceLayer != null) {
+          layerName = layer.sourceLayer!;
+        }
 
         for (var draw in draws) {
-          drawStyles
-              .add(DrawStyle(draw, ZoomLevel(layer.minzoom, layer.maxzoom)));
+          final String sourceLayer;
+          if (draw.sourceLayer != null) {
+            sourceLayer = draw.sourceLayer!;
+          } else {
+            sourceLayer = layerName;
+          }
+
+          if (mapDrawStyles.containsKey(sourceLayer)) {
+            mapDrawStyles[sourceLayer]!
+                .add(DrawStyle(draw, ZoomLevel(layer.minzoom, layer.maxzoom)));
+          } else {
+            mapDrawStyles[sourceLayer] = List.empty(growable: true);
+            mapDrawStyles[sourceLayer]!
+                .add(DrawStyle(draw, ZoomLevel(layer.minzoom, layer.maxzoom)));
+          }
         }
       }
-
-      mapDrawStyles[nameItem.key] = drawStyles;
     }
 
     return mapDrawStyles;
@@ -213,7 +229,7 @@ Tile_Layer? getLayer(Tile tile, String layerName) {
 
 void printTile(Tile tile) {
   for (var layer in tile.layers) {
-    print('layter name: ${layer.name}');
+    print('layer name: ${layer.name}');
 
     for (var feature in layer.features) {
       print('\tfeature type: ${feature.type}');
@@ -223,7 +239,7 @@ void printTile(Tile tile) {
 
 void printLayers(Tile tile) {
   for (var layer in tile.layers) {
-    print('layter name: ${layer.name}');
+    print('layer name: ${layer.name}');
   }
 }
 

@@ -83,6 +83,7 @@ _$TileStyleLayerImpl _$$TileStyleLayerImplFromJson(Map<String, dynamic> json) =>
       json['visible'] as bool?,
       (json['minzoom'] as num).toInt(),
       (json['maxzoom'] as num).toInt(),
+      json['source-layer'] as String?,
       (json['list'] as List<dynamic>?)
           ?.map((e) => TileStyleDraw.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -96,6 +97,7 @@ Map<String, dynamic> _$$TileStyleLayerImplToJson(
       'visible': instance.visible,
       'minzoom': instance.minzoom,
       'maxzoom': instance.maxzoom,
+      'source-layer': instance.sourceLayer,
       'list': instance.list,
       'type': instance.$type,
     };
