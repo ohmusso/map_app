@@ -159,17 +159,6 @@ void main() {
   });
 
   test('filter in, list string', () async {
-    // final filter = [
-    //   "all",
-    //   ["in", "ftCode", 50100],
-    //   ["==", "annoCtg", 140]
-    // ];
-
-    // expect(filter[0], "all");
-
-    // final filterSub = filter[1] as List<dynamic>;
-    // expect(filterSub[0], "in");
-
     final Map<String, Tile_Value> tags = {
       'annoCtg': Tile_Value.fromJson('{"4":"3"}'),
       'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
@@ -179,6 +168,22 @@ void main() {
       "in",
       "name",
       ['aaa', 'bbb', 'fugafuga']
+    ]);
+    expect(ret, true);
+  });
+
+  test('filter all', () async {
+    final Map<String, Tile_Value> tags = {
+      'ftCode': Tile_Value.fromJson('{"4":"50100"}'),
+      'annoCtg': Tile_Value.fromJson('{"4":"140"}'),
+      'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+    };
+
+    final ret = exeFilterExpresstions(tags, [
+      "all",
+      ['==', 'ftCode', 50100],
+      ['in', 'annoCtg', 140],
+      ['==', 'name', 'hogehoge']
     ]);
     expect(ret, true);
   });

@@ -242,40 +242,44 @@ Map<String, Tile_Value> genFeatureTags(Tile_Layer layer, Tile_Feature feature) {
   return featureTags;
 }
 
-bool exeFilterExpresstion(Map<String, Tile_Value> tags, dynamic filterExp) {
-  const int operatorIndex = 0;
-  const int keyIndex = 1;
-  const int valueIndex = 2;
+const int _filterOperatorIndex = 0;
+const int _filterkeyIndex = 1;
+const int _filtervalueIndex = 2;
 
+bool exeFilterExpresstion(Map<String, Tile_Value> tags, dynamic filterExp) {
   if (filterExp is bool) {
     return filterExp;
   }
 
   if (filterExp is List<dynamic>) {
-    switch (filterExp[operatorIndex]) {
+    switch (filterExp[_filterOperatorIndex]) {
       case '==':
-        if (tags[filterExp[keyIndex]] != null) {
-          final filterValue = filterExp[valueIndex];
+        if (tags[filterExp[_filterkeyIndex]] != null) {
+          final filterValue = filterExp[_filtervalueIndex];
           if (filterValue is String) {
-            return tags[filterExp[keyIndex]]!.stringValue == filterValue;
+            return tags[filterExp[_filterkeyIndex]]!.stringValue == filterValue;
           } else if (filterValue is int) {
-            return tags[filterExp[keyIndex]]!.intValue == filterValue;
+            return tags[filterExp[_filterkeyIndex]]!.intValue == filterValue;
           }
         }
         break;
       case 'in':
-        if (tags[filterExp[keyIndex]] != null) {
-          final filterValue = filterExp[valueIndex];
+        if (tags[filterExp[_filterkeyIndex]] != null) {
+          final filterValue = filterExp[_filtervalueIndex];
           if (filterValue is String &&
-              tags[filterExp[keyIndex]]!.hasStringValue()) {
-            return filterValue.contains(tags[filterExp[keyIndex]]!.stringValue);
+              tags[filterExp[_filterkeyIndex]]!.hasStringValue()) {
+            return filterValue
+                .contains(tags[filterExp[_filterkeyIndex]]!.stringValue);
+          } else if (filterValue is int &&
+              tags[filterExp[_filterkeyIndex]]!.hasIntValue()) {
+            return tags[filterExp[_filterkeyIndex]]!.intValue == filterValue;
           } else if (filterValue is List) {
             if (filterValue.first is String) {
               return filterValue
-                  .contains(tags[filterExp[keyIndex]]!.stringValue);
+                  .contains(tags[filterExp[_filterkeyIndex]]!.stringValue);
             } else if (filterValue.first is int) {
               return filterValue
-                  .contains(tags[filterExp[keyIndex]]!.intValue.toInt());
+                  .contains(tags[filterExp[_filterkeyIndex]]!.intValue.toInt());
             } else {
               // nop
             }
@@ -290,6 +294,30 @@ bool exeFilterExpresstion(Map<String, Tile_Value> tags, dynamic filterExp) {
 
   /// TODO throw exception message
   return false;
+}
+
+bool exeFilterExpresstions(Map<String, Tile_Value> tags, dynamic filterExp) {
+  if (filterExp is bool) {
+    return filterExp;
+  }
+
+  bool ret = true;
+  if (filterExp is List<dynamic>) {
+    switch (filterExp[_filterOperatorIndex]) {
+      case 'all':
+        for (int i = 1; i < filterExp.length; i++) {
+          if (exeFilterExpresstion(tags, filterExp[i]) == false) {
+            ret = false;
+            break;
+          }
+        }
+        break;
+      default:
+        ret = exeFilterExpresstion(tags, filterExp);
+    }
+  }
+
+  return ret;
 }
 
 void printTile(Tile tile) {
