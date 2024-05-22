@@ -242,6 +242,56 @@ Map<String, Tile_Value> genFeatureTags(Tile_Layer layer, Tile_Feature feature) {
   return featureTags;
 }
 
+bool exeFilterExpresstion(Map<String, Tile_Value> tags, dynamic filterExp) {
+  const int operatorIndex = 0;
+  const int keyIndex = 1;
+  const int valueIndex = 2;
+
+  if (filterExp is bool) {
+    return filterExp;
+  }
+
+  if (filterExp is List<dynamic>) {
+    switch (filterExp[operatorIndex]) {
+      case '==':
+        if (tags[filterExp[keyIndex]] != null) {
+          final filterValue = filterExp[valueIndex];
+          if (filterValue is String) {
+            return tags[filterExp[keyIndex]]!.stringValue == filterValue;
+          } else if (filterValue is int) {
+            return tags[filterExp[keyIndex]]!.intValue == filterValue;
+          }
+        }
+        break;
+      case 'in':
+        if (tags[filterExp[keyIndex]] != null) {
+          final filterValue = filterExp[valueIndex];
+          if (filterValue is String &&
+              tags[filterExp[keyIndex]]!.hasStringValue()) {
+            return filterValue.contains(tags[filterExp[keyIndex]]!.stringValue);
+          } else if (filterValue is List) {
+            if (filterValue.first is String) {
+              return filterValue
+                  .contains(tags[filterExp[keyIndex]]!.stringValue);
+            } else if (filterValue.first is int) {
+              return filterValue
+                  .contains(tags[filterExp[keyIndex]]!.intValue.toInt());
+            } else {
+              // nop
+            }
+          } else {
+            // nop
+          }
+        }
+        break;
+      default:
+    }
+  }
+
+  /// TODO throw exception message
+  return false;
+}
+
 void printTile(Tile tile) {
   for (var layer in tile.layers) {
     print('layer name: ${layer.name}');

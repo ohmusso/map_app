@@ -115,6 +115,74 @@ void main() {
     expect(color, Color.fromRGBO(0, 1, 255, 1.0));
   });
 
+  test('filter ==, intValue', () async {
+    final Map<String, Tile_Value> tags = {
+      'annoCtg': Tile_Value.fromJson('{"4":"2901"}')
+    };
+
+    final ret = exeFilterExpresstion(tags, ["==", "annoCtg", 2901]);
+    expect(ret, true);
+  });
+
+  test('filter ==, stringValue', () async {
+    final Map<String, Tile_Value> tags = {
+      'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
+      'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+    };
+
+    final ret = exeFilterExpresstion(tags, ["==", "name", 'hogehoge']);
+    expect(ret, true);
+  });
+
+  test('filter in, stringValue', () async {
+    final Map<String, Tile_Value> tags = {
+      'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
+      'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
+    };
+
+    final ret = exeFilterExpresstion(tags, ["in", "name", 'hogehoge,fugafuga']);
+    expect(ret, true);
+  });
+
+  test('filter in, list int', () async {
+    final Map<String, Tile_Value> tags = {
+      'annoCtg': Tile_Value.fromJson('{"4":"3"}'),
+      'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
+    };
+
+    final ret = exeFilterExpresstion(tags, [
+      "in",
+      "annoCtg",
+      [1, 2, 3]
+    ]);
+    expect(ret, true);
+  });
+
+  test('filter in, list string', () async {
+    // final filter = [
+    //   "all",
+    //   ["in", "ftCode", 50100],
+    //   ["==", "annoCtg", 140]
+    // ];
+
+    // expect(filter[0], "all");
+
+    // final filterSub = filter[1] as List<dynamic>;
+    // expect(filterSub[0], "in");
+
+    final Map<String, Tile_Value> tags = {
+      'annoCtg': Tile_Value.fromJson('{"4":"3"}'),
+      'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
+    };
+
+    final ret = exeFilterExpresstion(tags, [
+      "in",
+      "name",
+      ['aaa', 'bbb', 'fugafuga']
+    ]);
+    expect(ret, true);
+  });
+
   test('app test', () async {
     // read style
     final jsonString = await _loadJsonString('./style/std.json');
