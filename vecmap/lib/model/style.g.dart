@@ -49,6 +49,8 @@ _$TileStyleItemImpl _$$TileStyleItemImplFromJson(Map<String, dynamic> json) =>
       (json['list'] as List<dynamic>)
           .map((e) => TileStyleElement.fromJson(e as Map<String, dynamic>))
           .toList(),
+      (json['zIndex'] as num?)?.toInt(),
+      json['filter'] as List<dynamic>?,
       $type: json['type'] as String?,
     );
 
@@ -56,6 +58,8 @@ Map<String, dynamic> _$$TileStyleItemImplToJson(_$TileStyleItemImpl instance) =>
     <String, dynamic>{
       'title': instance.title,
       'list': instance.list,
+      'zIndex': instance.zIndex,
+      'filter': instance.filter,
       'type': instance.$type,
     };
 
@@ -87,6 +91,7 @@ _$TileStyleLayerImpl _$$TileStyleLayerImplFromJson(Map<String, dynamic> json) =>
       (json['list'] as List<dynamic>?)
           ?.map((e) => TileStyleDraw.fromJson(e as Map<String, dynamic>))
           .toList(),
+      json['filter'] as List<dynamic>?,
       $type: json['type'] as String?,
     );
 
@@ -99,6 +104,7 @@ Map<String, dynamic> _$$TileStyleLayerImplToJson(
       'maxzoom': instance.maxzoom,
       'source-layer': instance.sourceLayer,
       'list': instance.list,
+      'filter': instance.filter,
       'type': instance.$type,
     };
 

@@ -34,16 +34,22 @@ class TileStyleGroup with _$TileStyleGroup {
 @Freezed(unionKey: 'type')
 class TileStyleElement with _$TileStyleElement {
   const factory TileStyleElement.item(
-      String title, List<TileStyleElement> list) = TileStyleItem;
+    String title,
+    List<TileStyleElement> list,
+    int? zIndex,
+    List<dynamic>? filter,
+  ) = TileStyleItem;
   const factory TileStyleElement.directory(
       String title, List<TileStyleElement> list) = TileStyleDirectory;
   const factory TileStyleElement.layer(
-      String? title,
-      bool? visible,
-      int minzoom,
-      int maxzoom,
-      @JsonKey(name: 'source-layer') String? sourceLayer,
-      List<TileStyleDraw>? list) = TileStyleLayer;
+    String? title,
+    bool? visible,
+    int minzoom,
+    int maxzoom,
+    @JsonKey(name: 'source-layer') String? sourceLayer,
+    List<TileStyleDraw>? list,
+    List<dynamic>? filter,
+  ) = TileStyleLayer;
 
   factory TileStyleElement.fromJson(Map<String, dynamic> json) =>
       _$TileStyleElementFromJson(json);

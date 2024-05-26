@@ -52,8 +52,16 @@ void main() {
                 'type': 'item',
                 'title': '水域',
                 'list': [
-                  {'type': 'layer', 'title': '水域'}
-                ]
+                  {
+                    'type': 'layer',
+                    'title': '水域',
+                    'minzoom': 1,
+                    'maxzoom': 10,
+                    'filter': ['aaa']
+                  }
+                ],
+                'zIndex': 10,
+                'filter': [1, 'aaa', 3]
               }
             ]
           },
@@ -65,7 +73,7 @@ void main() {
                 'type': 'item',
                 'title': '緑地',
                 'list': [
-                  {'type': 'layer', 'title': '緑地'}
+                  {'type': 'layer', 'title': '緑地', 'minzoom': 1, 'maxzoom': 10}
                 ]
               }
             ]
@@ -75,11 +83,39 @@ void main() {
       TileStyleElement.directory('地形', [
         TileStyleElement.directory('hogehoge', [
           TileStyleElement.item(
-              '水域', [TileStyleElement.layer('水域', null, 1, 10, null, null)])
+            '水域',
+            [
+              TileStyleElement.layer(
+                '水域',
+                null,
+                1,
+                10,
+                null,
+                null,
+                ['aaa'],
+              )
+            ],
+            10,
+            [1, 'aaa', 3],
+          )
         ]),
         TileStyleElement.directory('fugafuga', [
           TileStyleElement.item(
-              '緑地', [TileStyleElement.layer('緑地', null, 1, 10, null, null)])
+            '緑地',
+            [
+              TileStyleElement.layer(
+                '緑地',
+                null,
+                1,
+                10,
+                null,
+                null,
+                null,
+              )
+            ],
+            null,
+            null,
+          )
         ])
       ]),
     );
@@ -95,7 +131,10 @@ void main() {
           ]
         }),
         TileStyleElement.item(
-            '水域', [TileStyleElement.layer('水域', null, 1, 10, null, null)]));
+            '水域',
+            [TileStyleElement.layer('水域', null, 1, 10, null, null, null)],
+            null,
+            null));
   });
 
   test('read layer from json', () async {
@@ -119,19 +158,35 @@ void main() {
           }
         ]
       }),
-      TileStyleElement.layer('道路', true, 1, 10, 'hogehoge', [
-        TileStyleDraw(
-            type: 'fill',
-            visible: true,
-            sourceLayer: 'hogehoge',
-            draw: {
-              'fill-color': 'red',
-              'fill-style': 'fill',
-            })
-      ]),
+      TileStyleElement.layer(
+        '道路',
+        true,
+        1,
+        10,
+        'hogehoge',
+        [
+          TileStyleDraw(
+              type: 'fill',
+              visible: true,
+              sourceLayer: 'hogehoge',
+              draw: {
+                'fill-color': 'red',
+                'fill-style': 'fill',
+              })
+        ],
+        null,
+      ),
     );
 
-    print(TileStyleElement.layer('42', false, 1, 10, null, null));
+    print(TileStyleElement.layer(
+      '42',
+      false,
+      1,
+      10,
+      null,
+      null,
+      null,
+    ));
   });
 
   test('get item', () async {
@@ -184,16 +239,24 @@ void main() {
   });
 
   test('get draws', () async {
-    final layer = TileStyleElement.layer('道路', true, 1, 10, null, [
-      TileStyleDraw(
-          type: 'fill',
-          visible: true,
-          sourceLayer: 'hogehoge',
-          draw: {
-            'fill-color': 'red',
-            'fill-style': 'fill',
-          })
-    ]) as TileStyleLayer;
+    final layer = TileStyleElement.layer(
+      '道路',
+      true,
+      1,
+      10,
+      null,
+      [
+        TileStyleDraw(
+            type: 'fill',
+            visible: true,
+            sourceLayer: 'hogehoge',
+            draw: {
+              'fill-color': 'red',
+              'fill-style': 'fill',
+            })
+      ],
+      null,
+    ) as TileStyleLayer;
 
     final draw = getTileStyleDrawFromLayer(layer).first;
     expect(draw.type, 'fill');

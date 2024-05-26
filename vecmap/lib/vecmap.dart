@@ -103,12 +103,21 @@ class DrawDataGenerator {
     final mapDrawStyles = Map<String, List<DrawStyle>>.new();
     String layerName = '';
 
+    /// add filter to DrawStyle
     for (var nameItem in mapNameItem.entries) {
+      List<dynamic>? filter = nameItem.value.filter;
       for (var layerElement in nameItem.value.list) {
         final layer = layerElement as TileStyleLayer;
         final draws = getTileStyleDrawFromLayer(layer);
+
         if (layer.sourceLayer != null) {
           layerName = layer.sourceLayer!;
+        }
+
+        if (layer.filter != null) {
+          filter = layer.filter!;
+        } else {
+          filter = [true];
         }
 
         for (var draw in draws) {
@@ -120,12 +129,12 @@ class DrawDataGenerator {
           }
 
           if (mapDrawStyles.containsKey(sourceLayer)) {
-            mapDrawStyles[sourceLayer]!
-                .add(DrawStyle(draw, ZoomLevel(layer.minzoom, layer.maxzoom)));
+            mapDrawStyles[sourceLayer]!.add(DrawStyle(
+                draw, ZoomLevel(layer.minzoom, layer.maxzoom), filter!));
           } else {
             mapDrawStyles[sourceLayer] = List.empty(growable: true);
-            mapDrawStyles[sourceLayer]!
-                .add(DrawStyle(draw, ZoomLevel(layer.minzoom, layer.maxzoom)));
+            mapDrawStyles[sourceLayer]!.add(DrawStyle(
+                draw, ZoomLevel(layer.minzoom, layer.maxzoom), filter!));
           }
         }
       }
@@ -140,10 +149,12 @@ const Color _fallbackColor = Color.fromARGB(100, 100, 100, 100);
 class DrawStyle {
   final Color color;
   final ZoomLevel zoomLevel;
+  final List<dynamic> filter;
 
   factory DrawStyle(
     TileStyleDraw draw,
     ZoomLevel zoomLevel,
+    List<dynamic> filter,
   ) {
     final Color color;
     switch (draw.type) {
@@ -160,11 +171,10 @@ class DrawStyle {
         color = _fallbackColor;
         break;
     }
-    return DrawStyle._(color, zoomLevel);
+    return DrawStyle._(color, zoomLevel, filter);
   }
 
-  DrawStyle._(this.color, this.zoomLevel);
-  DrawStyle.fallback(this.color, this.zoomLevel);
+  DrawStyle._(this.color, this.zoomLevel, this.filter);
 
   /// <https://docs.mapbox.com/style-spec/reference/types/#color>
   static Color convertColorFromStr(String? str) {
@@ -203,6 +213,11 @@ class ZoomLevel {
   final int minzoom;
   final int maxzoom;
   ZoomLevel(this.minzoom, this.maxzoom);
+
+  @override
+  String toString() {
+    return 'minzoom: $minzoom, maxzoom: $maxzoom';
+  }
 }
 
 class DrawData {
@@ -272,7 +287,15 @@ bool exeFilterExpresstion(Map<String, Tile_Value> tags, dynamic filterExp) {
                 .contains(tags[filterExp[_filterkeyIndex]]!.stringValue);
           } else if (filterValue is int &&
               tags[filterExp[_filterkeyIndex]]!.hasIntValue()) {
-            return tags[filterExp[_filterkeyIndex]]!.intValue == filterValue;
+            /// filter exp: ['in', 'key', Int1, Int2, ..., IntN]
+            bool ret = false;
+            for (int i = _filtervalueIndex; i < filterExp.length; i++) {
+              if (tags[filterExp[_filterkeyIndex]]!.intValue == filterExp[i]) {
+                ret = true;
+                break;
+              }
+            }
+            return ret;
           } else if (filterValue is List) {
             if (filterValue.first is String) {
               return filterValue
@@ -319,6 +342,11 @@ bool exeFilterExpresstions(Map<String, Tile_Value> tags, dynamic filterExp) {
 
   return ret;
 }
+
+// TODO
+// DrawStyle getStyle(Map<String, Tile_Value> tags, List<DrawStyle> styles) {
+//   return DrawStyle(draw, zoomLevel);
+// }
 
 void printTile(Tile tile) {
   for (var layer in tile.layers) {

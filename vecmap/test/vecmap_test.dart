@@ -115,97 +115,153 @@ void main() {
     expect(color, Color.fromRGBO(0, 1, 255, 1.0));
   });
 
-  test('filter ==, intValue', () async {
-    final Map<String, Tile_Value> tags = {
-      'annoCtg': Tile_Value.fromJson('{"4":"2901"}')
-    };
+  group('filter expression', () {
+    test('filter ==, intValue', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"2901"}')
+      };
 
-    final ret = exeFilterExpresstion(tags, ["==", "annoCtg", 2901]);
-    expect(ret, true);
+      final ret = exeFilterExpresstion(tags, ["==", "annoCtg", 2901]);
+      expect(ret, true);
+    });
+
+    test('filter ==, stringValue', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
+        'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+      };
+
+      final ret = exeFilterExpresstion(tags, ["==", "name", 'hogehoge']);
+      expect(ret, true);
+    });
+
+    test('filter in, stringValue', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
+        'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
+      };
+
+      final ret =
+          exeFilterExpresstion(tags, ["in", "name", 'hogehoge,fugafuga']);
+      expect(ret, true);
+    });
+
+    test('filter in, list int', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"3"}'),
+        'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
+      };
+
+      final ret = exeFilterExpresstion(tags, [
+        "in",
+        "annoCtg",
+        [1, 2, 3]
+      ]);
+      expect(ret, true);
+    });
+
+    test('filter in, some int', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"3"}'),
+        'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
+      };
+
+      final ret = exeFilterExpresstion(tags, ["in", "annoCtg", 1, 2, 3]);
+      expect(ret, true);
+    });
+
+    test('filter in, list string', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"3"}'),
+        'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
+      };
+
+      final ret = exeFilterExpresstion(tags, [
+        "in",
+        "name",
+        ['aaa', 'bbb', 'fugafuga']
+      ]);
+      expect(ret, true);
+    });
+
+    test('filter all 01', () async {
+      final Map<String, Tile_Value> tags = {
+        'ftCode': Tile_Value.fromJson('{"4":"50100"}'),
+        'annoCtg': Tile_Value.fromJson('{"4":"140"}'),
+        'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+      };
+
+      final ret = exeFilterExpresstions(tags, [
+        "all",
+        ['==', 'ftCode', 50100],
+        ['in', 'annoCtg', 140],
+        ['==', 'name', 'hogehoge']
+      ]);
+      expect(ret, true);
+    });
+
+    test('filter all in, ==', () async {
+      final Map<String, Tile_Value> tags = {
+        'ftCode': Tile_Value.fromJson('{"4":"2701"}'),
+        'annoCtg': Tile_Value.fromJson('{"4":"140"}'),
+        'motorway': Tile_Value.fromJson('{"4":"1"}'),
+      };
+
+      final ret = exeFilterExpresstions(tags, [
+        "all",
+        ['in', 'ftCode', 2701],
+        ['==', 'motorway', 1]
+      ]);
+      expect(ret, true);
+    });
   });
 
-  test('filter ==, stringValue', () async {
-    final Map<String, Tile_Value> tags = {
-      'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
-      'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
-    };
-
-    final ret = exeFilterExpresstion(tags, ["==", "name", 'hogehoge']);
-    expect(ret, true);
-  });
-
-  test('filter in, stringValue', () async {
-    final Map<String, Tile_Value> tags = {
-      'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
-      'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
-    };
-
-    final ret = exeFilterExpresstion(tags, ["in", "name", 'hogehoge,fugafuga']);
-    expect(ret, true);
-  });
-
-  test('filter in, list int', () async {
-    final Map<String, Tile_Value> tags = {
-      'annoCtg': Tile_Value.fromJson('{"4":"3"}'),
-      'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
-    };
-
-    final ret = exeFilterExpresstion(tags, [
-      "in",
-      "annoCtg",
-      [1, 2, 3]
-    ]);
-    expect(ret, true);
-  });
-
-  test('filter in, list string', () async {
-    final Map<String, Tile_Value> tags = {
-      'annoCtg': Tile_Value.fromJson('{"4":"3"}'),
-      'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
-    };
-
-    final ret = exeFilterExpresstion(tags, [
-      "in",
-      "name",
-      ['aaa', 'bbb', 'fugafuga']
-    ]);
-    expect(ret, true);
-  });
-
-  test('filter all', () async {
-    final Map<String, Tile_Value> tags = {
-      'ftCode': Tile_Value.fromJson('{"4":"50100"}'),
-      'annoCtg': Tile_Value.fromJson('{"4":"140"}'),
-      'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
-    };
-
-    final ret = exeFilterExpresstions(tags, [
-      "all",
-      ['==', 'ftCode', 50100],
-      ['in', 'annoCtg', 140],
-      ['==', 'name', 'hogehoge']
-    ]);
-    expect(ret, true);
-  });
-
+  /// TODO working
   test('app test', () async {
     // read style
     final jsonString = await _loadJsonString('./style/std.json');
     final json = jsonDecode(jsonString);
     final style = TileStyle.fromJson(json);
-    final mapNameItem = getItemNamesFromStyle(style);
-    assert(mapNameItem.isNotEmpty);
     final generator = DrawDataGenerator(style);
-    final drawStyles = generator.genDrawStyles();
+    final mapDrawStyles = generator.genDrawStyles();
 
     // read pbf
     File file = File('./11_1796_811.pbf');
     Tile tile = Tile.fromBuffer(file.readAsBytesSync());
 
+    // get drawStyle
     Tile_Layer? layer;
-    layer = tile.layers.where((layer) => layer.name == 'waterarea').firstOrNull;
-    List<DrawStyle> drawStyle = drawStyles['waterarea']!;
+    String targetLayerName = 'road';
+    layer =
+        tile.layers.where((layer) => layer.name == targetLayerName).firstOrNull;
+
     assert(layer != null);
+    for (var feature in layer!.features) {
+      final tags = genFeatureTags(layer, feature);
+      assert(mapDrawStyles[targetLayerName] != null);
+
+      final drawStyle = mapDrawStyles[targetLayerName]!.where((drawStyle) {
+        return exeFilterExpresstions(tags, drawStyle.filter);
+      }).firstOrNull;
+
+      if (drawStyle == null) {
+        print('ftcode: ${tags['ftCode']}, annoCtg: ${tags['annoCtg']}');
+        print('style not found');
+      } else {
+        // print('ftcode: ${tags['ftCode']}, annoCtg: ${tags['annoCtg']}');
+        // print('style found');
+        // print('${drawStyle.color}, ${drawStyle.zoomLevel}');
+      }
+    }
+
+    /// feature
+    /// - commands
+    /// - tags
+    ///
+    /// drawstyle
+    /// - filter
+    /// - color
+    /// - zoom
 
 // layer name: waterarea
 // layer name: wstructurea
