@@ -97,7 +97,7 @@ void main() {
     final json = jsonDecode(jsonString);
     final style = TileStyle.fromJson(json);
 
-    final generator = DrawDataGenerator(style);
+    final generator = DrawStyleGenerator(style);
     final drawStyles = generator.genDrawStyles();
     print(drawStyles);
   });
@@ -184,7 +184,7 @@ void main() {
       expect(ret, true);
     });
 
-    test('filter all 01', () async {
+    test('filter all', () async {
       final Map<String, Tile_Value> tags = {
         'ftCode': Tile_Value.fromJson('{"4":"50100"}'),
         'annoCtg': Tile_Value.fromJson('{"4":"140"}'),
@@ -214,15 +214,31 @@ void main() {
       ]);
       expect(ret, true);
     });
+
+    test('filter any', () async {
+      final Map<String, Tile_Value> tags = {
+        'ftCode': Tile_Value.fromJson('{"4":"50100"}'),
+        'annoCtg': Tile_Value.fromJson('{"4":"140"}'),
+        'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+      };
+
+      final ret = exeFilterExpresstions(tags, [
+        "any",
+        ['==', 'ftCode', 50101],
+        ['in', 'annoCtg', 141],
+        ['==', 'name', 'hogehoge']
+      ]);
+      expect(ret, true);
+    });
   });
 
-  /// TODO working
+  /// TODO working getDrawStyle
   test('app test', () async {
     // read style
     final jsonString = await _loadJsonString('./style/std.json');
     final json = jsonDecode(jsonString);
     final style = TileStyle.fromJson(json);
-    final generator = DrawDataGenerator(style);
+    final generator = DrawStyleGenerator(style);
     final mapDrawStyles = generator.genDrawStyles();
 
     // read pbf

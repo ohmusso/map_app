@@ -1,12 +1,13 @@
 library vecmap;
 
 import 'dart:math';
-import 'dart:ui';
-
-import 'package:vecmap/model/style.dart';
+import 'package:flutter/material.dart';
 
 import 'proto/vectile/vector_tile.pb.dart';
 export 'proto/vectile/vector_tile.pb.dart';
+
+import 'package:vecmap/model/style.dart';
+export 'model/style.dart';
 
 enum GeometryCommandType {
   moveTo(name: 'MoveTo', id: 1),
@@ -92,10 +93,10 @@ class GeometryCommand {
   final List<Point<int>> commandParameters;
 }
 
-class DrawDataGenerator {
+class DrawStyleGenerator {
   final TileStyle tileStyle;
 
-  DrawDataGenerator(this.tileStyle);
+  DrawStyleGenerator(this.tileStyle);
 
   /// key is source-layer
   Map<String, List<DrawStyle>> genDrawStyles() {
@@ -175,6 +176,10 @@ class DrawStyle {
   }
 
   DrawStyle._(this.color, this.zoomLevel, this.filter);
+  const DrawStyle.defaultStyle()
+      : color = Colors.black,
+        zoomLevel = const ZoomLevel(1, 15),
+        filter = const [true];
 
   /// <https://docs.mapbox.com/style-spec/reference/types/#color>
   static Color convertColorFromStr(String? str) {
@@ -212,7 +217,7 @@ class DrawStyle {
 class ZoomLevel {
   final int minzoom;
   final int maxzoom;
-  ZoomLevel(this.minzoom, this.maxzoom);
+  const ZoomLevel(this.minzoom, this.maxzoom);
 
   @override
   String toString() {
@@ -220,16 +225,30 @@ class ZoomLevel {
   }
 }
 
-class DrawData {
-  final int ftcode;
-  final List<DrawStyle> style;
-  final List<GeometryCommand> commands;
+// TODO
+DrawStyle getDrawStyle(
+  List<DrawStyle>? drawStyles,
+  Tile_Feature feature,
+  Map<String, Tile_Value> featureTags,
+) {
+  const fallback = const DrawStyle.defaultStyle();
 
-  DrawData(
-    this.ftcode,
-    this.style,
-    this.commands,
-  );
+  if (drawStyles == null) {
+    return fallback;
+  }
+
+  final drawStyle = drawStyles.where((drawStyle) {
+    return exeFilterExpresstions(featureTags, drawStyle.filter);
+  }).firstOrNull;
+
+  final DrawStyle ret;
+  if (drawStyle != null) {
+    ret = drawStyle;
+  } else {
+    ret = fallback;
+  }
+
+  return ret;
 }
 
 Tile_Layer? getLayer(Tile tile, String layerName) {
@@ -324,10 +343,11 @@ bool exeFilterExpresstions(Map<String, Tile_Value> tags, dynamic filterExp) {
     return filterExp;
   }
 
-  bool ret = true;
+  bool ret;
   if (filterExp is List<dynamic>) {
     switch (filterExp[_filterOperatorIndex]) {
       case 'all':
+        ret = true;
         for (int i = 1; i < filterExp.length; i++) {
           if (exeFilterExpresstion(tags, filterExp[i]) == false) {
             ret = false;
@@ -335,18 +355,24 @@ bool exeFilterExpresstions(Map<String, Tile_Value> tags, dynamic filterExp) {
           }
         }
         break;
+      case 'any':
+        ret = false;
+        for (int i = 1; i < filterExp.length; i++) {
+          if (exeFilterExpresstion(tags, filterExp[i]) == true) {
+            ret = true;
+            break;
+          }
+        }
+        break;
       default:
         ret = exeFilterExpresstion(tags, filterExp);
     }
+  } else {
+    ret = false;
   }
 
   return ret;
 }
-
-// TODO
-// DrawStyle getStyle(Map<String, Tile_Value> tags, List<DrawStyle> styles) {
-//   return DrawStyle(draw, zoomLevel);
-// }
 
 void printTile(Tile tile) {
   for (var layer in tile.layers) {
