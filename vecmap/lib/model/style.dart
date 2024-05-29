@@ -69,15 +69,18 @@ class TileStyleDraw with _$TileStyleDraw {
       _$TileStyleDrawFromJson(json);
 }
 
+/// key is directory.Title/Item.Title
 Map<String, TileStyleItem> getItemNamesFromStyle(TileStyle style) {
   final mapNameItem = Map<String, TileStyleItem>.new();
   for (var element in style.list) {
     if (element is TileStyleDirectory) {
+      String itemName = element.title;
       for (var e in element.list) {
         if (e is TileStyleDirectory) {
-          addItemNameFromDirectory(e, mapNameItem);
+          itemName += '/${e.title}';
+          _addItemNameFromDirectory(e, mapNameItem, itemName);
         } else if (e is TileStyleItem) {
-          mapNameItem[e.title] = e;
+          mapNameItem['${itemName}/${e.title}'] = e;
         } else {
           // assert(false, 'not support directory hierarchy: ${item.title}');
         }
@@ -93,21 +96,18 @@ Map<String, TileStyleItem> getItemNamesFromStyle(TileStyle style) {
 }
 
 /// recursive
-void addItemNameFromDirectory(
-    TileStyleDirectory directory, Map<String, TileStyleItem> mapNameItem) {
+/// key is directory.Name/Item.Title
+void _addItemNameFromDirectory(
+  TileStyleDirectory directory,
+  Map<String, TileStyleItem> mapNameItem,
+  String itemName,
+) {
   for (var element in directory.list) {
     if (element is TileStyleDirectory) {
-      for (var e in element.list) {
-        if (e is TileStyleDirectory) {
-          addItemNameFromDirectory(element, mapNameItem);
-        } else if (e is TileStyleItem) {
-          mapNameItem[e.title] = e;
-        } else {
-          // nop
-        }
-      }
+      itemName += '/${element.title}';
+      _addItemNameFromDirectory(element, mapNameItem, itemName);
     } else if (element is TileStyleItem) {
-      mapNameItem[element.title] = element;
+      mapNameItem['${itemName}/${element.title}'] = element;
     } else {
       // nop
     }

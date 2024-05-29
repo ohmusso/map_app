@@ -214,9 +214,7 @@ void main() {
     final titles = getItemNamesFromStyle(style);
     assert(titles.isNotEmpty);
 
-    expect(titles[0], '水域');
-    expect(titles[1], '高層建物');
-    expect(titles[2], '高層建物（外周線）');
+    expect(titles.keys.toList(), ['水域', '高層建物/高層建物', '高層建物/高層建物（外周線）']);
   });
 
   test('get item titles many data', () async {

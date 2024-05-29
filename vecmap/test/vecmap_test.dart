@@ -135,6 +135,25 @@ void main() {
       expect(ret, true);
     });
 
+    test('filter !=, intValue', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"2901"}')
+      };
+
+      final ret = exeFilterExpresstion(tags, ["!=", "annoCtg", 2901]);
+      expect(ret, false);
+    });
+
+    test('filter !=, stringValue', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
+        'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+      };
+
+      final ret = exeFilterExpresstion(tags, ["!=", "name", 'hogehoge']);
+      expect(ret, false);
+    });
+
     test('filter in, stringValue', () async {
       final Map<String, Tile_Value> tags = {
         'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),

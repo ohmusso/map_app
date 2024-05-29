@@ -102,14 +102,15 @@ class DrawStyleGenerator {
   Map<String, List<DrawStyle>> genDrawStyles() {
     final mapNameItem = getItemNamesFromStyle(tileStyle);
     final mapDrawStyles = Map<String, List<DrawStyle>>.new();
-    String layerName = '';
 
     /// add filter to DrawStyle
     for (var nameItem in mapNameItem.entries) {
-      List<dynamic>? filter = nameItem.value.filter;
+      List<dynamic> filter =
+          nameItem.value.filter == null ? [true] : nameItem.value.filter!;
       for (var layerElement in nameItem.value.list) {
         final layer = layerElement as TileStyleLayer;
         final draws = getTileStyleDrawFromLayer(layer);
+        String layerName = '';
 
         if (layer.sourceLayer != null) {
           layerName = layer.sourceLayer!;
@@ -117,8 +118,6 @@ class DrawStyleGenerator {
 
         if (layer.filter != null) {
           filter = layer.filter!;
-        } else {
-          filter = [true];
         }
 
         for (var draw in draws) {
@@ -131,11 +130,11 @@ class DrawStyleGenerator {
 
           if (mapDrawStyles.containsKey(sourceLayer)) {
             mapDrawStyles[sourceLayer]!.add(DrawStyle(
-                draw, ZoomLevel(layer.minzoom, layer.maxzoom), filter!));
+                draw, ZoomLevel(layer.minzoom, layer.maxzoom), filter));
           } else {
             mapDrawStyles[sourceLayer] = List.empty(growable: true);
             mapDrawStyles[sourceLayer]!.add(DrawStyle(
-                draw, ZoomLevel(layer.minzoom, layer.maxzoom), filter!));
+                draw, ZoomLevel(layer.minzoom, layer.maxzoom), filter));
           }
         }
       }
@@ -226,26 +225,24 @@ class ZoomLevel {
 }
 
 // TODO
-DrawStyle getDrawStyle(
+DrawStyle? getDrawStyle(
   List<DrawStyle>? drawStyles,
   Tile_Feature feature,
   Map<String, Tile_Value> featureTags,
 ) {
-  const fallback = const DrawStyle.defaultStyle();
-
   if (drawStyles == null) {
-    return fallback;
+    return null;
   }
 
   final drawStyle = drawStyles.where((drawStyle) {
     return exeFilterExpresstions(featureTags, drawStyle.filter);
   }).firstOrNull;
 
-  final DrawStyle ret;
+  final DrawStyle? ret;
   if (drawStyle != null) {
     ret = drawStyle;
   } else {
-    ret = fallback;
+    ret = null;
   }
 
   return ret;
@@ -294,6 +291,16 @@ bool exeFilterExpresstion(Map<String, Tile_Value> tags, dynamic filterExp) {
             return tags[filterExp[_filterkeyIndex]]!.stringValue == filterValue;
           } else if (filterValue is int) {
             return tags[filterExp[_filterkeyIndex]]!.intValue == filterValue;
+          }
+        }
+        break;
+      case '!=':
+        if (tags[filterExp[_filterkeyIndex]] != null) {
+          final filterValue = filterExp[_filtervalueIndex];
+          if (filterValue is String) {
+            return tags[filterExp[_filterkeyIndex]]!.stringValue != filterValue;
+          } else if (filterValue is int) {
+            return tags[filterExp[_filterkeyIndex]]!.intValue != filterValue;
           }
         }
         break;
