@@ -225,7 +225,7 @@ void main() {
     final mapNameItem = getItemNamesFromStyle(style);
     assert(mapNameItem.isNotEmpty);
 
-    final file = File("./test/item_titles.txt");
+    final file = File("./test/style_items.txt");
     if (!await file.exists()) {
       await file.create();
       await file.writeAsString(mapNameItem.keys.join('\r\n'));
