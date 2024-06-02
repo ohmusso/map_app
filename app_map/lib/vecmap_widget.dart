@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/services.dart' show rootBundle;
@@ -8,6 +9,15 @@ import 'package:vecmap/vecmap.dart';
 Future<Tile> getTileFromPbf(String path) async {
   final byteData = await rootBundle.load('assets/$path');
   return Tile.fromBuffer(byteData.buffer.asUint8List());
+}
+
+Future<Map<String, List<DrawStyle>>> getStyleFromJson(String path) async {
+  final jsonString = await rootBundle.loadString('assets/$path');
+  final json = jsonDecode(jsonString);
+  final style = TileStyle.fromJson(json);
+  final generator = DrawStyleGenerator(style);
+
+  return generator.genDrawStyles();
 }
 
 class Demo extends StatefulWidget {
@@ -21,6 +31,7 @@ class Demo extends StatefulWidget {
 
 class _DemoState extends State<Demo> {
   List<Tile_Layer> layers = [];
+  Map<String, List<DrawStyle>> mapDrawStyles = {};
   @override
   void initState() {
     super.initState();
@@ -31,6 +42,8 @@ class _DemoState extends State<Demo> {
       print('read pbf start');
       final Tile tile = await getTileFromPbf('11_1796_811.pbf');
       layers = tile.layers;
+
+      mapDrawStyles = await getStyleFromJson('std.json');
       print('read pbf finish');
 
       setState(() {});
@@ -47,7 +60,7 @@ class _DemoState extends State<Demo> {
       childWidget = const Text('loading...');
     } else {
       childWidget = CustomPaint(
-        painter: MyPainter(layers),
+        painter: MyPainter(layers, mapDrawStyles),
       );
     }
     return Scaffold(
@@ -70,13 +83,14 @@ class _DemoState extends State<Demo> {
 
 class MyPainter extends CustomPainter {
   final List<Tile_Layer> layers;
+  Map<String, List<DrawStyle>> mapDrawStyles;
   final double space = 20;
   final Paint _gridPint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1.0
     ..color = Colors.black26;
 
-  MyPainter(this.layers);
+  MyPainter(this.layers, this.mapDrawStyles);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -136,29 +150,33 @@ class MyPainter extends CustomPainter {
       return;
     }
 
-    final features = layer.features;
-    for (var feature in features) {
-      _drawFeature(canvas, feature);
+    for (var feature in layer.features) {
+      final featureTags = genFeatureTags(layer, feature);
+      final drawStyles = mapDrawStyles[layer.name];
+      final drawStyle = getDrawStyle(drawStyles, feature, featureTags);
+      if (drawStyle == null) {
+        // style is not found, do not draw
+        return;
+      }
+
+      final commands = GeometryCommand.newCommands(feature.geometry);
+      switch (feature.type) {
+        case Tile_GeomType.POINT:
+          _drawPoints(canvas, commands, drawStyle);
+          break;
+        case Tile_GeomType.LINESTRING:
+          _drawStringLine(canvas, commands, drawStyle);
+          break;
+        case Tile_GeomType.POLYGON:
+          _drawPolygon(canvas, commands, drawStyle);
+          break;
+        default:
+      }
     }
   }
 
-  void _drawFeature(Canvas canvas, Tile_Feature feature) {
-    final commands = GeometryCommand.newCommands(feature.geometry);
-    switch (feature.type) {
-      case Tile_GeomType.POINT:
-        _drawPoints(canvas, commands);
-        break;
-      case Tile_GeomType.LINESTRING:
-        _drawStringLine(canvas, commands);
-        break;
-      case Tile_GeomType.POLYGON:
-        _drawPolygon(canvas, commands);
-        break;
-      default:
-    }
-  }
-
-  void _drawPoints(Canvas canvas, List<GeometryCommand> commands) {
+  void _drawPoints(
+      Canvas canvas, List<GeometryCommand> commands, DrawStyle drawStyle) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 10.0
@@ -177,11 +195,12 @@ class MyPainter extends CustomPainter {
     }
   }
 
-  void _drawStringLine(Canvas canvas, List<GeometryCommand> commands) {
+  void _drawStringLine(
+      Canvas canvas, List<GeometryCommand> commands, DrawStyle drawStyle) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 10.0
-      ..color = Color.fromARGB(255, 0, 140, commands.hashCode);
+      ..color = drawStyle.color;
     final Path path = Path();
     Offset offset = const Offset(0.0, 0.0);
 
@@ -203,11 +222,12 @@ class MyPainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
-  void _drawPolygon(Canvas canvas, List<GeometryCommand> commands) {
+  void _drawPolygon(
+      Canvas canvas, List<GeometryCommand> commands, DrawStyle drawStyle) {
     final paint = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = 10.0
-      ..color = Color.fromARGB(255, 0, 140, commands.hashCode);
+      ..color = drawStyle.color;
     final Path path = Path();
     Offset offset = const Offset(0.0, 0.0);
 
