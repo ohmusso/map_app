@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'dart:io';
 
 import 'package:vecmap/vecmap.dart';
-import 'package:vecmap/model/style.dart';
 
 String _loadJsonString(String path) {
   final File file = File(path);
@@ -92,27 +91,125 @@ void main() {
     expect(tags['ftCode']!.intValue.toInt(), 2901);
   });
 
-  test('DrawStyleGenerator', () {
-    final jsonString = _loadJsonString('./style/test.json');
-    final json = jsonDecode(jsonString);
-    final style = TileStyle.fromJson(json);
+  group('DrawStyle fill', () {
+    test('new DrawStyl fill', () {
+      final DrawStyle style = DrawStyle(
+        TileStyleDraw(
+            type: 'fill',
+            visible: true,
+            sourceLayer: 'sourceLayer',
+            draw: {'fill-color': 'rgb(255,135,75)'}),
+        ZoomLevel(1, 10),
+        [true],
+      );
 
-    final generator = DrawStyleGenerator(style);
-    final drawStyles = generator.genDrawStyles();
-    print(drawStyles);
-  });
+      expect(style.zoomLevel.minzoom, 1);
+      expect(style.zoomLevel.maxzoom, 10);
+      expect(style.color, Color.fromARGB(255, 255, 135, 75));
+    });
 
-  test('convert string color', () {
-    String str;
-    Color color;
+    test('new LineWidth json object', () {
+      final linwWidthInt = LineWidth(1);
+      expect(linwWidthInt.getWidth(), 1.0);
 
-    str = 'rgba(10,20,30,0.5)';
-    color = DrawStyle.convertColorFromStr(str);
-    expect(color, Color.fromRGBO(10, 20, 30, 0.5));
+      final linwWidthDouble = LineWidth(1.5);
+      expect(linwWidthDouble.getWidth(), 1.5);
 
-    str = 'rgb(0,1,255)';
-    color = DrawStyle.convertColorFromStr(str);
-    expect(color, Color.fromRGBO(0, 1, 255, 1.0));
+      final tileDraw = TileStyleDraw.fromJson({
+        'type': 'line',
+        'visible': true,
+        'sourceLayer': 'hogehoge',
+        'draw': {
+          'line-color': 'red',
+          'line-style': 'line',
+          'line-width': {
+            'stops': [
+              [1, 5.0],
+              [5, 25.0]
+            ]
+          },
+        }
+      });
+
+      final linwWidthStops = LineWidth(tileDraw.draw['line-width']);
+      expect(linwWidthStops.getWidthWithZoom(1), 5.0);
+      expect(linwWidthStops.getWidthWithZoom(2), 10.0);
+      expect(linwWidthStops.getWidthWithZoom(3), 15.0);
+      expect(linwWidthStops.getWidthWithZoom(4), 20.0);
+    });
+
+    test('new LineWidth json string', () {
+      final jsonStr = """
+        {
+          "type":"line",
+          "source-layer":"landforml",
+          "info":{
+            "type":"line"
+          },
+          "draw":{
+            "line-cap":"square",
+            "line-color":"rgba(200, 160, 60,1)",
+            "line-visible":true,
+            "line-width": {
+                "stops":[
+                  [14,1.5],[17,4.5]
+                ]
+            }
+          }
+        }
+      """;
+
+      final json = jsonDecode(jsonStr);
+      final tileDraw = TileStyleDraw.fromJson(json);
+      final linwWidthStops = LineWidth(tileDraw.draw['line-width']);
+      expect(linwWidthStops.getWidthWithZoom(14), 1.5);
+      expect(linwWidthStops.getWidthWithZoom(15), 2.5);
+      expect(linwWidthStops.getWidthWithZoom(16), 3.5);
+      expect(linwWidthStops.getWidthWithZoom(17), 4.5);
+    });
+
+    test('new DrawStyl line', () {
+      final DrawStyle style = DrawStyle(
+        TileStyleDraw(
+            type: 'line',
+            visible: true,
+            sourceLayer: 'sourceLayer',
+            draw: {
+              'line-color': 'rgb(255,135,75)',
+              'line-width': 20,
+            }),
+        ZoomLevel(1, 10),
+        [true],
+      );
+
+      expect(style.zoomLevel.minzoom, 1);
+      expect(style.zoomLevel.maxzoom, 10);
+      expect(style.color, Color.fromARGB(255, 255, 135, 75));
+      expect(style.lineWidth!.getWidth(), 20.0);
+    });
+
+    test('DrawStyleGenerator', () {
+      final jsonString = _loadJsonString('./style/test.json');
+      final json = jsonDecode(jsonString);
+      final style = TileStyle.fromJson(json);
+
+      final generator = DrawStyleGenerator(style);
+      final drawStyles = generator.genDrawStyles();
+      print(drawStyles);
+    });
+
+    test('convert string color', () {
+      String str;
+      Color color;
+
+      str = 'rgba(10,20,30,0.5)';
+      color = DrawStyle.convertColorFromStr(str);
+      expect(color, Color.fromRGBO(10, 20, 30, 0.5));
+
+      str = 'rgb(0,1,255)';
+      color = DrawStyle.convertColorFromStr(str);
+      expect(color, Color.fromRGBO(0, 1, 255, 1.0));
+    });
   });
 
   group('filter expression', () {
@@ -251,44 +348,7 @@ void main() {
     });
   });
 
-  /// TODO working getDrawStyle
-  test('app test', () async {
-    // read style
-    final jsonString = await _loadJsonString('./style/std.json');
-    final json = jsonDecode(jsonString);
-    final style = TileStyle.fromJson(json);
-    final generator = DrawStyleGenerator(style);
-    final mapDrawStyles = generator.genDrawStyles();
-
-    // read pbf
-    File file = File('./11_1796_811.pbf');
-    Tile tile = Tile.fromBuffer(file.readAsBytesSync());
-
-    // get drawStyle
-    Tile_Layer? layer;
-    String targetLayerName = 'road';
-    layer =
-        tile.layers.where((layer) => layer.name == targetLayerName).firstOrNull;
-
-    assert(layer != null);
-    for (var feature in layer!.features) {
-      final tags = genFeatureTags(layer, feature);
-      assert(mapDrawStyles[targetLayerName] != null);
-
-      final drawStyle = mapDrawStyles[targetLayerName]!.where((drawStyle) {
-        return exeFilterExpresstions(tags, drawStyle.filter);
-      }).firstOrNull;
-
-      if (drawStyle == null) {
-        print('ftcode: ${tags['ftCode']}, annoCtg: ${tags['annoCtg']}');
-        print('style not found');
-      } else {
-        // print('ftcode: ${tags['ftCode']}, annoCtg: ${tags['annoCtg']}');
-        // print('style found');
-        // print('${drawStyle.color}, ${drawStyle.zoomLevel}');
-      }
-    }
-
+  group('app test', () {
     /// feature
     /// - commands
     /// - tags
@@ -297,18 +357,87 @@ void main() {
     /// - filter
     /// - color
     /// - zoom
+    // layer name: waterarea
+    // layer name: wstructurea
+    // layer name: boundary
+    // layer name: contour
+    // layer name: label
+    // layer name: elevation
+    // layer name: river
+    // layer name: road
+    // layer name: railway
+    // layer name: transp
+    // layer name: landforma
+    // layer name: symbol
 
-// layer name: waterarea
-// layer name: wstructurea
-// layer name: boundary
-// layer name: contour
-// layer name: label
-// layer name: elevation
-// layer name: river
-// layer name: road
-// layer name: railway
-// layer name: transp
-// layer name: landforma
-// layer name: symbol
+    test('find style corresponding to feature: road', () async {
+      // read style
+      final jsonString = await _loadJsonString('./style/std.json');
+      final json = jsonDecode(jsonString);
+      final style = TileStyle.fromJson(json);
+      final generator = DrawStyleGenerator(style);
+      final mapDrawStyles = generator.genDrawStyles();
+
+      // read pbf
+      File file = File('./11_1796_811.pbf');
+      Tile tile = Tile.fromBuffer(file.readAsBytesSync());
+
+      // get drawStyle
+      Tile_Layer? layer;
+      String targetLayerName = 'road';
+      layer = tile.layers
+          .where((layer) => layer.name == targetLayerName)
+          .firstOrNull;
+
+      assert(layer != null);
+      for (var feature in layer!.features) {
+        final tags = genFeatureTags(layer, feature);
+        assert(mapDrawStyles[targetLayerName] != null);
+
+        final drawStyle = mapDrawStyles[targetLayerName]!.where((drawStyle) {
+          return exeFilterExpresstions(tags, drawStyle.filter);
+        }).firstOrNull;
+
+        if (drawStyle == null) {
+          print('ftcode: ${tags['ftCode']}, annoCtg: ${tags['annoCtg']}');
+          print('style not found');
+        }
+      }
+    });
+
+    test('find style corresponding to feature: symbol', () async {
+      // read style
+      final jsonString = await _loadJsonString('./style/std.json');
+      final json = jsonDecode(jsonString);
+      final style = TileStyle.fromJson(json);
+      final generator = DrawStyleGenerator(style);
+      final mapDrawStyles = generator.genDrawStyles();
+
+      // read pbf
+      File file = File('./11_1796_811.pbf');
+      Tile tile = Tile.fromBuffer(file.readAsBytesSync());
+
+      // get drawStyle
+      Tile_Layer? layer;
+      String targetLayerName = 'symbol';
+      layer = tile.layers
+          .where((layer) => layer.name == targetLayerName)
+          .firstOrNull;
+
+      assert(layer != null);
+      for (var feature in layer!.features) {
+        final tags = genFeatureTags(layer, feature);
+        assert(mapDrawStyles[targetLayerName] != null);
+
+        final drawStyle = mapDrawStyles[targetLayerName]!.where((drawStyle) {
+          return exeFilterExpresstions(tags, drawStyle.filter);
+        }).firstOrNull;
+
+        if (drawStyle == null) {
+          print('ftcode: ${tags['ftCode']}, annoCtg: ${tags['annoCtg']}');
+          print('style not found');
+        }
+      }
+    });
   });
 }

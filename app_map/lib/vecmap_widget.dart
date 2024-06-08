@@ -199,7 +199,7 @@ class MyPainter extends CustomPainter {
       Canvas canvas, List<GeometryCommand> commands, DrawStyle drawStyle) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 10.0
+      ..strokeWidth = drawStyle.lineWidth!.getWidth()
       ..color = drawStyle.color;
     final Path path = Path();
     Offset offset = const Offset(0.0, 0.0);

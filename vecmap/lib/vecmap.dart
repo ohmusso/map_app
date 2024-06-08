@@ -145,10 +145,12 @@ class DrawStyleGenerator {
 }
 
 const Color _fallbackColor = Color.fromARGB(100, 100, 100, 100);
+const double _defaultLineWidth = 10.0;
 
 class DrawStyle {
   final Color color;
   final ZoomLevel zoomLevel;
+  final LineWidth? lineWidth;
   final List<dynamic> filter;
 
   factory DrawStyle(
@@ -157,27 +159,39 @@ class DrawStyle {
     List<dynamic> filter,
   ) {
     final Color color;
+    final LineWidth? lineWidth;
+
     switch (draw.type) {
       case 'fill':
         color = convertColorFromStr(draw.draw['fill-color']);
+        lineWidth = null;
         break;
       case 'line':
         color = convertColorFromStr(draw.draw['line-color']);
+        if (draw.draw.containsKey('line-width')) {
+          lineWidth = LineWidth(draw.draw['line-width']);
+        } else {
+          lineWidth = LineWidth(_defaultLineWidth);
+        }
         break;
       case 'symbol':
         color = _fallbackColor;
+        lineWidth = null;
         break;
       default:
         color = _fallbackColor;
+        lineWidth = null;
         break;
     }
-    return DrawStyle._(color, zoomLevel, filter);
+
+    return DrawStyle._(color, zoomLevel, lineWidth, filter);
   }
 
-  DrawStyle._(this.color, this.zoomLevel, this.filter);
+  DrawStyle._(this.color, this.zoomLevel, this.lineWidth, this.filter);
   const DrawStyle.defaultStyle()
       : color = Colors.black,
         zoomLevel = const ZoomLevel(1, 15),
+        lineWidth = null,
         filter = const [true];
 
   /// <https://docs.mapbox.com/style-spec/reference/types/#color>
@@ -213,6 +227,9 @@ class DrawStyle {
   }
 }
 
+const int zommLevelAll = 0;
+const int zommLevelMax = 65535;
+
 class ZoomLevel {
   final int minzoom;
   final int maxzoom;
@@ -224,7 +241,71 @@ class ZoomLevel {
   }
 }
 
-// TODO
+class LineWidth {
+  final Map<int, double> _mapLineWidth;
+
+  factory LineWidth(dynamic width) {
+    final mapLineWidth = Map<int, double>.new();
+
+    if (width is num) {
+      mapLineWidth[zommLevelAll] = width.toDouble();
+      return LineWidth._(mapLineWidth);
+    }
+
+    /// interpolate: stops: [[zoomlevel, width],[zoomlevel, width]]
+    final widthStops = width as Map;
+
+    if (!widthStops.containsKey('stops')) {
+      /// fallback
+      mapLineWidth[zommLevelAll] = _defaultLineWidth;
+      return LineWidth._(mapLineWidth);
+    }
+
+    final arrayZoomWidth = widthStops['stops']! as List;
+    int preZoom = zommLevelMax;
+    for (List zoomWidth in arrayZoomWidth) {
+      final zoom = zoomWidth[0] as int;
+      final width = zoomWidth[1] as num;
+      mapLineWidth[zoom] = width.toDouble();
+
+      _interpolate(mapLineWidth, preZoom, zoom);
+
+      preZoom = zoom;
+    }
+
+    return LineWidth._(mapLineWidth);
+  }
+
+  LineWidth._(this._mapLineWidth);
+
+  static void _interpolate(Map<int, double> map, int preZoom, int curZoom) {
+    if (preZoom == zommLevelMax) {
+      return;
+    }
+
+    final double d = (map[curZoom]! - map[preZoom]!) / (curZoom - preZoom);
+    for (int i = preZoom + 1; i < curZoom; i++) {
+      map[i] = map[i - 1]! + d;
+    }
+  }
+
+  double? getWidthWithZoom(int zoom) {
+    if (_mapLineWidth.containsKey(zommLevelAll)) {
+      return _mapLineWidth[zommLevelAll];
+    }
+
+    return _mapLineWidth[zoom];
+  }
+
+  double getWidth() {
+    if (_mapLineWidth.containsKey(zommLevelAll)) {
+      return _mapLineWidth[zommLevelAll]!;
+    }
+
+    return _defaultLineWidth;
+  }
+}
+
 DrawStyle? getDrawStyle(
   List<DrawStyle>? drawStyles,
   Tile_Feature feature,
