@@ -9,6 +9,8 @@ export 'proto/vectile/vector_tile.pb.dart';
 import 'package:vecmap/model/style.dart';
 export 'model/style.dart';
 
+export 'vecmap_webapi.dart';
+
 enum GeometryCommandType {
   moveTo(name: 'MoveTo', id: 1),
   lineTo(name: 'LineTo', id: 2),
