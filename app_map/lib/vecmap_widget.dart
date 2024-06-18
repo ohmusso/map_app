@@ -5,9 +5,10 @@ import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:flutter/material.dart';
 import 'package:vecmap/vecmap.dart';
+import 'webapi.dart';
 
 Future<Tile> getTileFromPbf(String path) async {
-  final byteData = await rootBundle.load('assets/$path');
+  final byteData = await vecMapWebApi.getPbf(11, 1792, 813);
   return Tile.fromBuffer(byteData.buffer.asUint8List());
 }
 
