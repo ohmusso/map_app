@@ -7,8 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:vecmap/vecmap.dart';
 import 'webapi.dart';
 
-Future<Tile> getTileFromPbf(String path) async {
-  final byteData = await vecMapWebApi.getPbf(11, 1792, 813);
+Future<Tile> getTileFromPbf(
+  int zoomLevel,
+  int x,
+  int y,
+) async {
+  final byteData = await vecMapWebApi.getPbf(zoomLevel, x, y);
   return Tile.fromBuffer(byteData.buffer.asUint8List());
 }
 
@@ -33,6 +37,7 @@ class Demo extends StatefulWidget {
 class _DemoState extends State<Demo> {
   List<Tile_Layer> layers = [];
   Map<String, List<DrawStyle>> mapDrawStyles = {};
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +46,7 @@ class _DemoState extends State<Demo> {
 
     Future(() async {
       print('read pbf start');
-      final Tile tile = await getTileFromPbf('11_1796_811.pbf');
+      final Tile tile = await getTileFromPbf(11, 1796, 811);
       layers = tile.layers;
 
       mapDrawStyles = await getStyleFromJson('std.json');
@@ -70,13 +75,21 @@ class _DemoState extends State<Demo> {
         elevation: 0,
         title: const Text("Demo"),
       ),
-      body: Center(
-        child: Container(
-          color: Colors.white,
-          child: SizedBox.expand(
-            child: childWidget,
+      body: Column(
+        children: [
+          Text("aaaaaaaaaa"),
+          Text("aaaaaaaaaa"),
+          Text("aaaaaaaaaa"),
+          Text("aaaaaaaaaa"),
+          Expanded(
+            child: Container(
+              color: Colors.white,
+              child: SizedBox.expand(
+                child: childWidget,
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -95,6 +108,9 @@ class MyPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    print(size.width);
+    print(size.height);
+
     // 原点を画面の中心に設定する
     canvas.save();
     canvas.translate(size.width / 2, size.height / 2);
@@ -103,9 +119,15 @@ class MyPainter extends CustomPainter {
 
     // レイヤーを描画
     canvas.save();
-    const double scale = 0.15;
-    const double offsetTileToCenter = 4096 / 2 * scale;
-    canvas.translate((size.width / 2) - offsetTileToCenter, 20); // 画面中央
+
+    // タイルを画面収まるように縮小/拡大するため倍率を計算する
+    final double tileSize = 4096.0; // タイル(正方形)の1辺の長さ
+    final double scale = min(size.width, size.height) / tileSize;
+
+    // MAPが画面中央に表示されるように原点を設定する
+    final double offsetTileToCenter = tileSize / 2.0 * scale;
+    canvas.translate((size.width / 2.0) - offsetTileToCenter, 20.0);
+
     canvas.scale(scale, scale);
 
     Tile_Layer? layer;
