@@ -38,9 +38,15 @@ class _InputLatlngWidgetState extends State<InputLatlngWidget> {
         _numInputField(lngEditCtrl),
         ElevatedButton(
           onPressed: () {
-            final lat = double.parse(latEditCtrl.text);
-            final lng = double.parse(lngEditCtrl.text);
-            widget.vnLatLng.value = InputLatLng(lat, lng);
+            final lat = double.tryParse(latEditCtrl.text);
+            final lng = double.tryParse(lngEditCtrl.text);
+            if ((lat != null) && (lng != null)) {
+              widget.vnLatLng.value = InputLatLng(lat, lng);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('invalid input'),
+              ));
+            }
           },
           child: Text('update'),
         )

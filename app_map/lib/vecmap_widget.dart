@@ -87,27 +87,18 @@ class _DemoState extends State<Demo> {
         painter: MyPainter(layers, mapDrawStyles),
       );
     }
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: const Text("Demo"),
-      ),
-      body: Column(
-        children: [
-          InputLatlngWidget(
-            vnLatLng: vnInputLatLng,
+    return Stack(
+      children: [
+        Container(
+          color: Colors.white,
+          child: SizedBox.expand(
+            child: childWidget,
           ),
-          Expanded(
-            child: Container(
-              color: Colors.white,
-              child: SizedBox.expand(
-                child: childWidget,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+        InputLatlngWidget(
+          vnLatLng: vnInputLatLng,
+        ),
+      ],
     );
   }
 }
