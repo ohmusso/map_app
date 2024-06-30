@@ -1,11 +1,16 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
-import 'package:flutter/services.dart' show rootBundle;
 
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
+import 'package:latlng/latlng.dart' hide Point;
 import 'package:vecmap/vecmap.dart';
+
 import 'webapi.dart';
+import 'input_latlng_widget.dart';
+
+final _epsg = EPSG4326();
 
 Future<Tile> getTileFromPbf(
   int zoomLevel,
@@ -35,28 +40,41 @@ class Demo extends StatefulWidget {
 }
 
 class _DemoState extends State<Demo> {
+  final ValueNotifier<InputLatLng> vnInputLatLng =
+      ValueNotifier<InputLatLng>(InputLatLng(34.661791, 135.083908));
   List<Tile_Layer> layers = [];
   Map<String, List<DrawStyle>> mapDrawStyles = {};
+  double zoomLevel = 11.0;
+
+  Future<void> _fetchPbf() async {
+    print('read pbf start');
+    final lat = vnInputLatLng.value.lat;
+    final lng = vnInputLatLng.value.lng;
+    final latLng = LatLng.degree(lat, lng);
+
+    final tileIndex = _epsg.toTileIndexZoom(latLng, zoomLevel);
+    final Tile tile = await getTileFromPbf(
+        zoomLevel.floor(), tileIndex.x.floor(), tileIndex.y.floor());
+
+    layers = tile.layers;
+    mapDrawStyles = await getStyleFromJson('std.json');
+    print('read pbf finish');
+
+    setState(() {});
+  }
 
   @override
   void initState() {
+    vnInputLatLng.addListener(
+      // when update vnInputLatLng,  call bellow
+      () {
+        _fetchPbf();
+      },
+    );
+
+    _fetchPbf();
+
     super.initState();
-
-    print('init state start');
-
-    Future(() async {
-      print('read pbf start');
-      final Tile tile = await getTileFromPbf(11, 1796, 811);
-      layers = tile.layers;
-
-      mapDrawStyles = await getStyleFromJson('std.json');
-      print('read pbf finish');
-
-      setState(() {});
-    });
-
-    print('init state finish');
-    setState(() {});
   }
 
   @override
@@ -77,10 +95,9 @@ class _DemoState extends State<Demo> {
       ),
       body: Column(
         children: [
-          Text("aaaaaaaaaa"),
-          Text("aaaaaaaaaa"),
-          Text("aaaaaaaaaa"),
-          Text("aaaaaaaaaa"),
+          InputLatlngWidget(
+            vnLatLng: vnInputLatLng,
+          ),
           Expanded(
             child: Container(
               color: Colors.white,
@@ -108,8 +125,8 @@ class MyPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print(size.width);
-    print(size.height);
+    // print(size.width);
+    // print(size.height);
 
     // 原点を画面の中心に設定する
     canvas.save();
