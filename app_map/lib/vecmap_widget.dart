@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:latlng/latlng.dart' hide Point;
 import 'package:vecmap/vecmap.dart';
 
+import 'grid_widget.dart';
 import 'webapi.dart';
 import 'input_latlng_widget.dart';
 
@@ -87,17 +88,15 @@ class _DemoState extends State<Demo> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        const GridWidget(),
         GestureDetector(
           onPanUpdate: (details) {
             position += details.delta;
             print(position);
           },
-          child: Container(
-            color: Colors.white,
-            child: SizedBox.expand(
-              child: CustomPaint(
-                painter: painter,
-              ),
+          child: SizedBox.expand(
+            child: CustomPaint(
+              painter: painter,
             ),
           ),
         ),
@@ -112,11 +111,6 @@ class _DemoState extends State<Demo> {
 class MyPainter extends CustomPainter {
   final ValueNotifier<List<Tile_Layer>> vnLayers;
   Map<String, List<DrawStyle>> mapDrawStyles;
-  final double space = 20;
-  final Paint _gridPint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.0
-    ..color = Colors.black26;
 
   MyPainter(this.mapDrawStyles, {required this.vnLayers})
       : super(repaint: vnLayers) {
@@ -129,12 +123,6 @@ class MyPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     print(size.width);
     print(size.height);
-
-    // 原点を画面の中心に設定する
-    canvas.save();
-    canvas.translate(size.width / 2, size.height / 2);
-    _drawGrid(canvas, size);
-    canvas.restore();
 
     // レイヤーを描画
     canvas.save();
@@ -312,48 +300,6 @@ class MyPainter extends CustomPainter {
     }
 
     return curOffset;
-  }
-
-  void _drawGrid(Canvas canvas, Size size) {
-    _drawGridRight(canvas, size);
-
-    canvas.save();
-    canvas.scale(1, -1);
-    _drawGridRight(canvas, size);
-    canvas.restore();
-
-    canvas.save();
-    canvas.scale(-1, 1);
-    _drawGridRight(canvas, size);
-    canvas.restore();
-
-    canvas.save();
-    canvas.scale(-1, -1);
-    _drawGridRight(canvas, size);
-    canvas.restore();
-  }
-
-  void _drawGridRight(Canvas canvas, Size size) {
-    // キャンパスの保存
-    canvas.save();
-
-    // 縦線を描く
-    for (int i = 0; i < size.width / 2 / space; i++) {
-      canvas.drawLine(Offset(0, 0), Offset(0, size.height / 2), _gridPint);
-      canvas.translate(space, 0);
-    }
-
-    // キャンパスリセット（原点リセット）
-    canvas.restore();
-    canvas.save();
-
-    // 横線を描く
-    for (int i = 0; i < size.height / 2 / space; i++) {
-      canvas.drawLine(Offset(0, 0), Offset(size.width / 2, 0), _gridPint);
-      canvas.translate(0, space);
-    }
-
-    canvas.restore();
   }
 
   @override
