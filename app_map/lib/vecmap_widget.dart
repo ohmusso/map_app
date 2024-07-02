@@ -42,9 +42,13 @@ class Demo extends StatefulWidget {
 class _DemoState extends State<Demo> {
   final ValueNotifier<InputLatLng> vnInputLatLng =
       ValueNotifier<InputLatLng>(InputLatLng(34.661791, 135.083908));
-  List<Tile_Layer> layers = [];
+  final ValueNotifier<List<Tile_Layer>> vnLayers =
+      ValueNotifier<List<Tile_Layer>>(List.empty());
+  CustomPainter? painter = null;
+
   Map<String, List<DrawStyle>> mapDrawStyles = {};
   double zoomLevel = 11.0;
+  Offset position = Offset(0.0, 0.0);
 
   Future<void> _fetchPbf() async {
     print('read pbf start');
@@ -56,9 +60,11 @@ class _DemoState extends State<Demo> {
     final Tile tile = await getTileFromPbf(
         zoomLevel.floor(), tileIndex.x.floor(), tileIndex.y.floor());
 
-    layers = tile.layers;
+    vnLayers.value = tile.layers;
     mapDrawStyles = await getStyleFromJson('std.json');
     print('read pbf finish');
+
+    painter = MyPainter(mapDrawStyles, vnLayers: vnLayers);
 
     setState(() {});
   }
@@ -79,20 +85,20 @@ class _DemoState extends State<Demo> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget childWidget;
-    if (layers.isEmpty) {
-      childWidget = const Text('loading...');
-    } else {
-      childWidget = CustomPaint(
-        painter: MyPainter(layers, mapDrawStyles),
-      );
-    }
     return Stack(
       children: [
-        Container(
-          color: Colors.white,
-          child: SizedBox.expand(
-            child: childWidget,
+        GestureDetector(
+          onPanUpdate: (details) {
+            position += details.delta;
+            print(position);
+          },
+          child: Container(
+            color: Colors.white,
+            child: SizedBox.expand(
+              child: CustomPaint(
+                painter: painter,
+              ),
+            ),
           ),
         ),
         InputLatlngWidget(
@@ -104,7 +110,7 @@ class _DemoState extends State<Demo> {
 }
 
 class MyPainter extends CustomPainter {
-  final List<Tile_Layer> layers;
+  final ValueNotifier<List<Tile_Layer>> vnLayers;
   Map<String, List<DrawStyle>> mapDrawStyles;
   final double space = 20;
   final Paint _gridPint = Paint()
@@ -112,12 +118,17 @@ class MyPainter extends CustomPainter {
     ..strokeWidth = 1.0
     ..color = Colors.black26;
 
-  MyPainter(this.layers, this.mapDrawStyles);
+  MyPainter(this.mapDrawStyles, {required this.vnLayers})
+      : super(repaint: vnLayers) {
+    vnLayers.addListener(() {
+      print('repaint');
+    });
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
-    // print(size.width);
-    // print(size.height);
+    print(size.width);
+    print(size.height);
 
     // 原点を画面の中心に設定する
     canvas.save();
@@ -138,6 +149,7 @@ class MyPainter extends CustomPainter {
 
     canvas.scale(scale, scale);
 
+    List<Tile_Layer> layers = vnLayers.value;
     Tile_Layer? layer;
     layer = layers.where((layer) => layer.name == 'waterarea').firstOrNull;
     _drawFeatures(canvas, layer);
