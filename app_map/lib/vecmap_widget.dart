@@ -42,16 +42,16 @@ class Demo extends StatefulWidget {
   State<Demo> createState() => _DemoState();
 }
 
+final beginLatlngAkashi = InputLatLng(34.661791, 135.083908);
+
 class _DemoState extends State<Demo> {
   final ValueNotifier<InputLatLng> vnInputLatLng =
-      ValueNotifier<InputLatLng>(InputLatLng(34.661791, 135.083908));
-  final ValueNotifier<List<VecmapDrawer>> vnDrawers =
-      ValueNotifier<List<VecmapDrawer>>(List.empty());
+      ValueNotifier<InputLatLng>(beginLatlngAkashi);
+  final ValueNotifier<Offset> vnPosition = ValueNotifier<Offset>(Offset.zero);
   CustomPainter? painter = null;
 
   Map<String, List<DrawStyle>> mapDrawStyles = {};
   double zoomLevel = 11.0;
-  Offset position = Offset(0.0, 0.0);
 
   Future<void> _fetchPbf() async {
     print('read pbf start');
@@ -104,7 +104,8 @@ class _DemoState extends State<Demo> {
     layer = tile.layers.where((layer) => layer.name == 'symbol').firstOrNull;
     drawers.addAll(_genDrawer(layer));
 
-    vnDrawers.value = drawers;
+    painter = MyPainter(drawers, vnPosition: vnPosition);
+    vnPosition.value = Offset.zero;
 
     setState(() {});
   }
@@ -155,8 +156,6 @@ class _DemoState extends State<Demo> {
 
     _fetchPbf();
 
-    painter = MyPainter(vnDrawers: vnDrawers);
-
     super.initState();
   }
 
@@ -167,8 +166,7 @@ class _DemoState extends State<Demo> {
         const GridWidget(),
         GestureDetector(
           onPanUpdate: (details) {
-            position += details.delta;
-            print(position);
+            vnPosition.value += details.delta;
           },
           child: SizedBox.expand(
             child: CustomPaint(
@@ -337,10 +335,12 @@ Offset _drawGeoLineTo(Path path, List<Point<int>> cmdParams, Offset offset) {
 }
 
 class MyPainter extends CustomPainter {
-  final ValueNotifier<List<VecmapDrawer>> vnDrawers;
+  final List<VecmapDrawer> drawers;
+  final ValueNotifier<Offset> vnPosition;
 
-  MyPainter({required this.vnDrawers}) : super(repaint: vnDrawers) {
-    vnDrawers.addListener(() {
+  MyPainter(this.drawers, {required this.vnPosition})
+      : super(repaint: vnPosition) {
+    vnPosition.addListener(() {
       print('repaint');
     });
   }
@@ -361,10 +361,13 @@ class MyPainter extends CustomPainter {
     final double offsetTileToCenter = tileSize / 2.0 * scale;
     canvas.translate((size.width / 2.0) - offsetTileToCenter, 20.0);
 
+    // タッチによる移動
+    canvas.translate(vnPosition.value.dx, vnPosition.value.dy);
+
     canvas.scale(scale, scale);
 
     // タイルを描画
-    for (var drawer in vnDrawers.value) {
+    for (var drawer in drawers) {
       drawer.vecmapDraw(canvas);
     }
 
