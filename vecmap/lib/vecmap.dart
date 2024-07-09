@@ -10,6 +10,7 @@ import 'package:vecmap/model/style.dart';
 export 'model/style.dart';
 
 export 'vecmap_webapi.dart';
+export 'icon_sprite.dart';
 
 enum GeometryCommandType {
   moveTo(name: 'MoveTo', id: 1),

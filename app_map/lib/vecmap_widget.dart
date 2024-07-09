@@ -33,6 +33,20 @@ Future<Map<String, List<DrawStyle>>> getStyleFromJson(String path) async {
   return generator.genDrawStyles();
 }
 
+Future<MapIcon> generateMapIcon() async {
+  final imageByte = await rootBundle.load('assets/sprite/std.png');
+  final imageUint8List = imageByte.buffer.asUint8List();
+
+  final jsonString = await rootBundle.loadString('assets/sprite/std.json');
+  final spriteJson = jsonDecode(jsonString);
+
+  final mapIcon = MapIcon.fromPngUint8List(imageUint8List, spriteJson);
+
+  assert(mapIcon.isImageExist());
+
+  return mapIcon;
+}
+
 class Demo extends StatefulWidget {
   const Demo({
     super.key,
@@ -48,6 +62,7 @@ class _DemoState extends State<Demo> {
   final ValueNotifier<InputLatLng> vnInputLatLng =
       ValueNotifier<InputLatLng>(beginLatlngAkashi);
   final ValueNotifier<Offset> vnPosition = ValueNotifier<Offset>(Offset.zero);
+  late MapIcon _mapIcon;
   CustomPainter? painter = null;
 
   Map<String, List<DrawStyle>> mapDrawStyles = {};
@@ -65,7 +80,7 @@ class _DemoState extends State<Demo> {
     print('read pbf finish');
 
     print('read style');
-    mapDrawStyles = await getStyleFromJson('std.json');
+    mapDrawStyles = await getStyleFromJson('style/std.json');
 
     print('generate drawer');
     List<VecmapDrawer> drawers = List.empty(growable: true);
@@ -110,6 +125,10 @@ class _DemoState extends State<Demo> {
     setState(() {});
   }
 
+  Future<void> _initMapIcon() async {
+    _mapIcon = await generateMapIcon();
+  }
+
   List<VecmapDrawer> _genDrawer(Tile_Layer? layer) {
     if (layer == null) {
       return List.empty();
@@ -150,6 +169,7 @@ class _DemoState extends State<Demo> {
     vnInputLatLng.addListener(
       // when update vnInputLatLng,  call bellow
       () {
+        _initMapIcon();
         _fetchPbf();
       },
     );
@@ -340,16 +360,11 @@ class MyPainter extends CustomPainter {
 
   MyPainter(this.drawers, {required this.vnPosition})
       : super(repaint: vnPosition) {
-    vnPosition.addListener(() {
-      print('repaint');
-    });
+    vnPosition.addListener(() {});
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    print(size.width);
-    print(size.height);
-
     // レイヤーを描画
     canvas.save();
 
