@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
@@ -33,18 +33,18 @@ Future<Map<String, List<DrawStyle>>> getStyleFromJson(String path) async {
   return generator.genDrawStyles();
 }
 
-Future<MapIcon> generateMapIcon() async {
-  final imageByte = await rootBundle.load('assets/sprite/std.png');
-  final imageUint8List = imageByte.buffer.asUint8List();
+Future<Map<String, ui.Image>> generateMapIconImage() async {
+  final jsonString = await rootBundle.loadString('assets/map_icons/std.json');
+  final Map<String, dynamic> json = jsonDecode(jsonString);
+  final Map<String, ui.Image> mapImage = Map();
+  for (var key in json.keys) {
+    // TODO
+    final iconBytes = await rootBundle.load('assets/map_icons/$key.png');
+    final image = await decodeImageFromList(iconBytes.buffer.asUint8List());
+    mapImage[key] = image;
+  }
 
-  final jsonString = await rootBundle.loadString('assets/sprite/std.json');
-  final spriteJson = jsonDecode(jsonString);
-
-  final mapIcon = MapIcon.fromPngUint8List(imageUint8List, spriteJson);
-
-  assert(mapIcon.isImageExist());
-
-  return mapIcon;
+  return mapImage;
 }
 
 class Demo extends StatefulWidget {
@@ -62,8 +62,8 @@ class _DemoState extends State<Demo> {
   final ValueNotifier<InputLatLng> vnInputLatLng =
       ValueNotifier<InputLatLng>(beginLatlngAkashi);
   final ValueNotifier<Offset> vnPosition = ValueNotifier<Offset>(Offset.zero);
-  late MapIcon _mapIcon;
   CustomPainter? painter = null;
+  Map<String, ui.Image> _mapIconImage = Map();
 
   Map<String, List<DrawStyle>> mapDrawStyles = {};
   double zoomLevel = 11.0;
@@ -125,8 +125,13 @@ class _DemoState extends State<Demo> {
     setState(() {});
   }
 
+  Future<void> _init() async {
+    await _initMapIcon();
+    await _fetchPbf();
+  }
+
   Future<void> _initMapIcon() async {
-    _mapIcon = await generateMapIcon();
+    _mapIconImage = await generateMapIconImage();
   }
 
   List<VecmapDrawer> _genDrawer(Tile_Layer? layer) {
@@ -149,7 +154,7 @@ class _DemoState extends State<Demo> {
       final commands = GeometryCommand.newCommands(feature.geometry);
       switch (feature.type) {
         case Tile_GeomType.POINT:
-          drawers.add(VecmapPointsDrawer(commands, drawStyle));
+          drawers.add(VecmapPointsDrawer(commands, drawStyle, _mapIconImage));
           break;
         case Tile_GeomType.LINESTRING:
           drawers.add(VecmapLinestringDrawer(commands, drawStyle));
@@ -169,12 +174,11 @@ class _DemoState extends State<Demo> {
     vnInputLatLng.addListener(
       // when update vnInputLatLng,  call bellow
       () {
-        _initMapIcon();
         _fetchPbf();
       },
     );
 
-    _fetchPbf();
+    _init();
 
     super.initState();
   }
@@ -210,15 +214,24 @@ abstract class VecmapDrawer {
 class VecmapPointsDrawer implements VecmapDrawer {
   final Paint paint;
   final List<Offset> offsets;
+  final ui.Image? iconImage;
 
   factory VecmapPointsDrawer(
     List<GeometryCommand> commands,
     DrawStyle drawStyle,
+    Map<String, ui.Image> mapIconImage,
   ) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 10.0
       ..color = Color.fromARGB(255, 0, 140, commands.hashCode);
+
+    final ui.Image? image;
+    if (mapIconImage.containsKey(drawStyle.iconImage)) {
+      image = mapIconImage[drawStyle.iconImage];
+    } else {
+      image = null;
+    }
 
     final List<Offset> offsets = List.empty(growable: true);
     for (var command in commands) {
@@ -235,14 +248,23 @@ class VecmapPointsDrawer implements VecmapDrawer {
       }
     }
 
-    return VecmapPointsDrawer._(paint, offsets);
+    return VecmapPointsDrawer._(paint, offsets, image);
   }
 
-  VecmapPointsDrawer._(this.paint, this.offsets);
+  VecmapPointsDrawer._(this.paint, this.offsets, this.iconImage);
 
   @override
   void vecmapDraw(Canvas canvas) {
-    canvas.drawPoints(PointMode.points, offsets, paint);
+    // TODO draw text
+
+    if (iconImage == null) {
+      // TODO what to draw?
+      // canvas.drawPoints(ui.PointMode.points, offsets, paint);
+    } else {
+      for (var offset in offsets) {
+        canvas.drawImage(iconImage!, offset, paint);
+      }
+    }
   }
 }
 

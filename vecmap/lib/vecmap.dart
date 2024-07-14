@@ -10,7 +10,6 @@ import 'package:vecmap/model/style.dart';
 export 'model/style.dart';
 
 export 'vecmap_webapi.dart';
-export 'icon_sprite.dart';
 
 enum GeometryCommandType {
   moveTo(name: 'MoveTo', id: 1),
@@ -155,6 +154,7 @@ class DrawStyle {
   final ZoomLevel zoomLevel;
   final LineWidth? lineWidth;
   final List<dynamic> filter;
+  final String? iconImage;
 
   factory DrawStyle(
     TileStyleDraw draw,
@@ -163,11 +163,13 @@ class DrawStyle {
   ) {
     final Color color;
     final LineWidth? lineWidth;
+    final String? iconImage;
 
     switch (draw.type) {
       case 'fill':
         color = convertColorFromStr(draw.draw['fill-color']);
         lineWidth = null;
+        iconImage = null;
         break;
       case 'line':
         color = convertColorFromStr(draw.draw['line-color']);
@@ -176,26 +178,31 @@ class DrawStyle {
         } else {
           lineWidth = LineWidth(_defaultLineWidth);
         }
+        iconImage = null;
         break;
       case 'symbol':
         color = _fallbackColor;
         lineWidth = null;
+        iconImage = draw.draw['icon-image'];
         break;
       default:
         color = _fallbackColor;
         lineWidth = null;
+        iconImage = null;
         break;
     }
 
-    return DrawStyle._(color, zoomLevel, lineWidth, filter);
+    return DrawStyle._(color, zoomLevel, lineWidth, filter, iconImage);
   }
 
-  DrawStyle._(this.color, this.zoomLevel, this.lineWidth, this.filter);
+  DrawStyle._(
+      this.color, this.zoomLevel, this.lineWidth, this.filter, this.iconImage);
   const DrawStyle.defaultStyle()
       : color = Colors.black,
         zoomLevel = const ZoomLevel(1, 15),
         lineWidth = null,
-        filter = const [true];
+        filter = const [true],
+        iconImage = null;
 
   /// <https://docs.mapbox.com/style-spec/reference/types/#color>
   static Color convertColorFromStr(String? str) {
