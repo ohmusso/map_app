@@ -182,7 +182,7 @@ class DrawStyle {
         iconImage = null;
         break;
       case 'symbol':
-        color = _fallbackColor;
+        color = _genTextColor(draw.draw);
         lineWidth = null;
         iconImage = draw.draw['icon-image'];
         break;
@@ -206,6 +206,15 @@ class DrawStyle {
         filter = const [true],
         textInfo = const {},
         iconImage = null;
+
+  static Color _genTextColor(Map<String, dynamic> jsonDraw) {
+    const key = 'text-color';
+    if (jsonDraw.containsKey(key)) {
+      return convertColorFromStr(jsonDraw[key]);
+    } else {
+      return _fallbackColor;
+    }
+  }
 
   /// <https://docs.mapbox.com/style-spec/reference/types/#color>
   static Color convertColorFromStr(String? str) {

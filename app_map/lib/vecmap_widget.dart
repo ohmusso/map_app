@@ -224,16 +224,16 @@ class VecmapPointsDrawer implements VecmapDrawer {
     Map<String, ui.Image> mapIconImage,
     Map<String, Tile_Value> tags,
   ) {
+    // TODO fix.use to draw image.
     final paint = Paint()
-      ..style = PaintingStyle.stroke
+      ..style = PaintingStyle.fill
       ..strokeWidth = 10.0
-      ..color = Color.fromARGB(255, 0, 140, commands.hashCode);
+      ..color = Colors.blueAccent;
 
-    const textStyle =
-        TextStyle(color: Colors.black, fontSize: 14, fontFamily: 'NotoSansJP');
+    final textStyle = TextStyle(
+        color: drawStyle.color, fontSize: 20, fontFamily: 'NotoSansJP');
 
     final String? dispText = _genDispText(tags, drawStyle.textInfo);
-    print(dispText);
 
     final textSpan = TextSpan(
       text: dispText,
