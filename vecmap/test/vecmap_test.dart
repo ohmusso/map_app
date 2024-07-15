@@ -98,6 +98,7 @@ void main() {
             type: 'fill',
             visible: true,
             sourceLayer: 'sourceLayer',
+            info: {},
             draw: {'fill-color': 'rgb(255,135,75)'}),
         ZoomLevel(1, 10),
         [true],
@@ -174,6 +175,7 @@ void main() {
             type: 'line',
             visible: true,
             sourceLayer: 'sourceLayer',
+            info: {},
             draw: {
               'line-color': 'rgb(255,135,75)',
               'line-width': 20,

@@ -154,6 +154,7 @@ class DrawStyle {
   final ZoomLevel zoomLevel;
   final LineWidth? lineWidth;
   final List<dynamic> filter;
+  final Map<String, dynamic> textInfo;
   final String? iconImage;
 
   factory DrawStyle(
@@ -192,16 +193,18 @@ class DrawStyle {
         break;
     }
 
-    return DrawStyle._(color, zoomLevel, lineWidth, filter, iconImage);
+    return DrawStyle._(
+        color, zoomLevel, lineWidth, filter, draw.info, iconImage);
   }
 
-  DrawStyle._(
-      this.color, this.zoomLevel, this.lineWidth, this.filter, this.iconImage);
+  DrawStyle._(this.color, this.zoomLevel, this.lineWidth, this.filter,
+      this.textInfo, this.iconImage);
   const DrawStyle.defaultStyle()
       : color = Colors.black,
         zoomLevel = const ZoomLevel(1, 15),
         lineWidth = null,
         filter = const [true],
+        textInfo = const {},
         iconImage = null;
 
   /// <https://docs.mapbox.com/style-spec/reference/types/#color>

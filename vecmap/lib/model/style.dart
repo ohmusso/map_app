@@ -62,6 +62,7 @@ class TileStyleDraw with _$TileStyleDraw {
     required String type,
     required bool? visible,
     @JsonKey(name: 'source-layer') required String? sourceLayer,
+    required Map<String, dynamic> info,
     required Map<String, dynamic> draw,
   }) = _TileStyleDraw;
 
@@ -130,6 +131,7 @@ const defaultDraw = TileStyleDraw(
     type: '*',
     visible: true,
     sourceLayer: '*',
+    info: {},
     draw: {'color': 'rgba(0, 0, 0, 1)'});
 
 List<TileStyleDraw> getTileStyleDrawFromLayer(TileStyleLayer layer) {

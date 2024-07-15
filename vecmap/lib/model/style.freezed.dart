@@ -1392,6 +1392,7 @@ mixin _$TileStyleDraw {
   bool? get visible => throw _privateConstructorUsedError;
   @JsonKey(name: 'source-layer')
   String? get sourceLayer => throw _privateConstructorUsedError;
+  Map<String, dynamic> get info => throw _privateConstructorUsedError;
   Map<String, dynamic> get draw => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1410,6 +1411,7 @@ abstract class $TileStyleDrawCopyWith<$Res> {
       {String type,
       bool? visible,
       @JsonKey(name: 'source-layer') String? sourceLayer,
+      Map<String, dynamic> info,
       Map<String, dynamic> draw});
 }
 
@@ -1429,6 +1431,7 @@ class _$TileStyleDrawCopyWithImpl<$Res, $Val extends TileStyleDraw>
     Object? type = null,
     Object? visible = freezed,
     Object? sourceLayer = freezed,
+    Object? info = null,
     Object? draw = null,
   }) {
     return _then(_value.copyWith(
@@ -1444,6 +1447,10 @@ class _$TileStyleDrawCopyWithImpl<$Res, $Val extends TileStyleDraw>
           ? _value.sourceLayer
           : sourceLayer // ignore: cast_nullable_to_non_nullable
               as String?,
+      info: null == info
+          ? _value.info
+          : info // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
       draw: null == draw
           ? _value.draw
           : draw // ignore: cast_nullable_to_non_nullable
@@ -1464,6 +1471,7 @@ abstract class _$$TileStyleDrawImplCopyWith<$Res>
       {String type,
       bool? visible,
       @JsonKey(name: 'source-layer') String? sourceLayer,
+      Map<String, dynamic> info,
       Map<String, dynamic> draw});
 }
 
@@ -1481,6 +1489,7 @@ class __$$TileStyleDrawImplCopyWithImpl<$Res>
     Object? type = null,
     Object? visible = freezed,
     Object? sourceLayer = freezed,
+    Object? info = null,
     Object? draw = null,
   }) {
     return _then(_$TileStyleDrawImpl(
@@ -1496,6 +1505,10 @@ class __$$TileStyleDrawImplCopyWithImpl<$Res>
           ? _value.sourceLayer
           : sourceLayer // ignore: cast_nullable_to_non_nullable
               as String?,
+      info: null == info
+          ? _value._info
+          : info // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
       draw: null == draw
           ? _value._draw
           : draw // ignore: cast_nullable_to_non_nullable
@@ -1511,8 +1524,10 @@ class _$TileStyleDrawImpl extends _TileStyleDraw with DiagnosticableTreeMixin {
       {required this.type,
       required this.visible,
       @JsonKey(name: 'source-layer') required this.sourceLayer,
+      required final Map<String, dynamic> info,
       required final Map<String, dynamic> draw})
-      : _draw = draw,
+      : _info = info,
+        _draw = draw,
         super._();
 
   factory _$TileStyleDrawImpl.fromJson(Map<String, dynamic> json) =>
@@ -1525,6 +1540,14 @@ class _$TileStyleDrawImpl extends _TileStyleDraw with DiagnosticableTreeMixin {
   @override
   @JsonKey(name: 'source-layer')
   final String? sourceLayer;
+  final Map<String, dynamic> _info;
+  @override
+  Map<String, dynamic> get info {
+    if (_info is EqualUnmodifiableMapView) return _info;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_info);
+  }
+
   final Map<String, dynamic> _draw;
   @override
   Map<String, dynamic> get draw {
@@ -1535,7 +1558,7 @@ class _$TileStyleDrawImpl extends _TileStyleDraw with DiagnosticableTreeMixin {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'TileStyleDraw(type: $type, visible: $visible, sourceLayer: $sourceLayer, draw: $draw)';
+    return 'TileStyleDraw(type: $type, visible: $visible, sourceLayer: $sourceLayer, info: $info, draw: $draw)';
   }
 
   @override
@@ -1546,6 +1569,7 @@ class _$TileStyleDrawImpl extends _TileStyleDraw with DiagnosticableTreeMixin {
       ..add(DiagnosticsProperty('type', type))
       ..add(DiagnosticsProperty('visible', visible))
       ..add(DiagnosticsProperty('sourceLayer', sourceLayer))
+      ..add(DiagnosticsProperty('info', info))
       ..add(DiagnosticsProperty('draw', draw));
   }
 
@@ -1558,12 +1582,18 @@ class _$TileStyleDrawImpl extends _TileStyleDraw with DiagnosticableTreeMixin {
             (identical(other.visible, visible) || other.visible == visible) &&
             (identical(other.sourceLayer, sourceLayer) ||
                 other.sourceLayer == sourceLayer) &&
+            const DeepCollectionEquality().equals(other._info, _info) &&
             const DeepCollectionEquality().equals(other._draw, _draw));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, type, visible, sourceLayer,
+  int get hashCode => Object.hash(
+      runtimeType,
+      type,
+      visible,
+      sourceLayer,
+      const DeepCollectionEquality().hash(_info),
       const DeepCollectionEquality().hash(_draw));
 
   @JsonKey(ignore: true)
@@ -1585,6 +1615,7 @@ abstract class _TileStyleDraw extends TileStyleDraw {
       {required final String type,
       required final bool? visible,
       @JsonKey(name: 'source-layer') required final String? sourceLayer,
+      required final Map<String, dynamic> info,
       required final Map<String, dynamic> draw}) = _$TileStyleDrawImpl;
   const _TileStyleDraw._() : super._();
 
@@ -1598,6 +1629,8 @@ abstract class _TileStyleDraw extends TileStyleDraw {
   @override
   @JsonKey(name: 'source-layer')
   String? get sourceLayer;
+  @override
+  Map<String, dynamic> get info;
   @override
   Map<String, dynamic> get draw;
   @override

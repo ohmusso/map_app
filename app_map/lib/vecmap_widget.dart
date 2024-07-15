@@ -38,7 +38,6 @@ Future<Map<String, ui.Image>> generateMapIconImage() async {
   final Map<String, dynamic> json = jsonDecode(jsonString);
   final Map<String, ui.Image> mapImage = Map();
   for (var key in json.keys) {
-    // TODO
     final iconBytes = await rootBundle.load('assets/map_icons/$key.png');
     final image = await decodeImageFromList(iconBytes.buffer.asUint8List());
     mapImage[key] = image;
@@ -154,7 +153,8 @@ class _DemoState extends State<Demo> {
       final commands = GeometryCommand.newCommands(feature.geometry);
       switch (feature.type) {
         case Tile_GeomType.POINT:
-          drawers.add(VecmapPointsDrawer(commands, drawStyle, _mapIconImage));
+          drawers.add(VecmapPointsDrawer(
+              commands, drawStyle, _mapIconImage, featureTags));
           break;
         case Tile_GeomType.LINESTRING:
           drawers.add(VecmapLinestringDrawer(commands, drawStyle));
@@ -213,23 +213,47 @@ abstract class VecmapDrawer {
 /// https://github.com/mapbox/vector-tile-spec/blob/master/2.1/README.md#4352-example-multi-point
 class VecmapPointsDrawer implements VecmapDrawer {
   final Paint paint;
+  final TextPainter textPainter;
   final List<Offset> offsets;
   final ui.Image? iconImage;
+  final Map<String, Tile_Value> tags;
 
   factory VecmapPointsDrawer(
     List<GeometryCommand> commands,
     DrawStyle drawStyle,
     Map<String, ui.Image> mapIconImage,
+    Map<String, Tile_Value> tags,
   ) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 10.0
       ..color = Color.fromARGB(255, 0, 140, commands.hashCode);
 
+    const textStyle =
+        TextStyle(color: Colors.black, fontSize: 14, fontFamily: 'NotoSansJP');
+
+    final String? dispText = _genDispText(tags, drawStyle.textInfo);
+    print(dispText);
+
+    final textSpan = TextSpan(
+      text: dispText,
+      style: textStyle,
+    );
+
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: 100,
+    );
+
     final ui.Image? image;
     if (mapIconImage.containsKey(drawStyle.iconImage)) {
       image = mapIconImage[drawStyle.iconImage];
     } else {
+      // print(tags);
       image = null;
     }
 
@@ -248,23 +272,47 @@ class VecmapPointsDrawer implements VecmapDrawer {
       }
     }
 
-    return VecmapPointsDrawer._(paint, offsets, image);
+    return VecmapPointsDrawer._(paint, textPainter, offsets, image, tags);
   }
 
-  VecmapPointsDrawer._(this.paint, this.offsets, this.iconImage);
+  VecmapPointsDrawer._(
+    this.paint,
+    this.textPainter,
+    this.offsets,
+    this.iconImage,
+    this.tags,
+  );
 
   @override
   void vecmapDraw(Canvas canvas) {
-    // TODO draw text
+    // TODO draw internal text of icon
 
     if (iconImage == null) {
-      // TODO what to draw?
-      // canvas.drawPoints(ui.PointMode.points, offsets, paint);
+      for (var offset in offsets) {
+        textPainter.paint(canvas, offset);
+      }
     } else {
       for (var offset in offsets) {
         canvas.drawImage(iconImage!, offset, paint);
+        textPainter.paint(canvas, offset);
       }
     }
+  }
+
+  static String? _genDispText(
+    Map<String, Tile_Value> tags,
+    Map<String, dynamic> textInfo,
+  ) {
+    if (!textInfo.containsKey('text-field')) {
+      return null;
+    }
+    final textField = textInfo['text-field'];
+
+    if (!tags.containsKey(textField)) {
+      return null;
+    }
+
+    return tags[textField]!.stringValue;
   }
 }
 
@@ -392,7 +440,8 @@ class MyPainter extends CustomPainter {
 
     // タイルを画面収まるように縮小/拡大するため倍率を計算する
     final double tileSize = 4096.0; // タイル(正方形)の1辺の長さ
-    final double scale = min(size.width, size.height) / tileSize;
+    // final double scale = min(size.width, size.height) / tileSize;
+    final double scale = 0.55;
 
     // MAPが画面中央に表示されるように原点を設定する
     final double offsetTileToCenter = tileSize / 2.0 * scale;

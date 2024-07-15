@@ -169,6 +169,7 @@ void main() {
               type: 'fill',
               visible: true,
               sourceLayer: 'hogehoge',
+              info: {},
               draw: {
                 'fill-color': 'red',
                 'fill-style': 'fill',
@@ -248,6 +249,7 @@ void main() {
             type: 'fill',
             visible: true,
             sourceLayer: 'hogehoge',
+            info: {},
             draw: {
               'fill-color': 'red',
               'fill-style': 'fill',
