@@ -312,7 +312,15 @@ class VecmapPointsDrawer implements VecmapDrawer {
       return null;
     }
 
-    return tags[textField]!.stringValue;
+    if (tags[textField]!.hasStringValue()) {
+      return tags[textField]!.stringValue;
+    }
+
+    if (tags[textField]!.hasIntValue()) {
+      return tags[textField]!.intValue.toString();
+    }
+
+    return 'error';
   }
 }
 
