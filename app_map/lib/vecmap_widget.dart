@@ -142,7 +142,8 @@ class _DemoState extends State<Demo> {
     for (var feature in layer.features) {
       final featureTags = genFeatureTags(layer, feature);
       final drawStyles = mapDrawStyles[layer.name];
-      final drawStyle = getDrawStyle(drawStyles, feature, featureTags);
+      final drawStyle =
+          getDrawStyle(drawStyles, zoomLevel, feature, featureTags);
 
       if (drawStyle == null) {
         // style is not found, do not draw
@@ -215,6 +216,7 @@ class VecmapPointsDrawer implements VecmapDrawer {
   final Paint paint;
   final TextPainter textPainter;
   final List<Offset> offsets;
+  final Offset textOffset;
   final ui.Image? iconImage;
   final Map<String, Tile_Value> tags;
 
@@ -224,7 +226,7 @@ class VecmapPointsDrawer implements VecmapDrawer {
     Map<String, ui.Image> mapIconImage,
     Map<String, Tile_Value> tags,
   ) {
-    // TODO fix.use to draw image.
+    // TODO use to draw image.
     final paint = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = 10.0
@@ -234,6 +236,7 @@ class VecmapPointsDrawer implements VecmapDrawer {
         color: drawStyle.color, fontSize: 20, fontFamily: 'NotoSansJP');
 
     final String? dispText = _genDispText(tags, drawStyle.textInfo);
+    final Offset textOffset = _genTextOffset(drawStyle.textOffset);
 
     final textSpan = TextSpan(
       text: dispText,
@@ -272,20 +275,22 @@ class VecmapPointsDrawer implements VecmapDrawer {
       }
     }
 
-    return VecmapPointsDrawer._(paint, textPainter, offsets, image, tags);
+    return VecmapPointsDrawer._(
+        paint, textPainter, offsets, textOffset, image, tags);
   }
 
   VecmapPointsDrawer._(
     this.paint,
     this.textPainter,
     this.offsets,
+    this.textOffset,
     this.iconImage,
     this.tags,
   );
 
   @override
   void vecmapDraw(Canvas canvas) {
-    // TODO draw internal text of icon
+    // TODO draw internal text of icon. apply text offset
 
     if (iconImage == null) {
       for (var offset in offsets) {
@@ -294,6 +299,9 @@ class VecmapPointsDrawer implements VecmapDrawer {
     } else {
       for (var offset in offsets) {
         canvas.drawImage(iconImage!, offset, paint);
+
+        /// TODO textPainter.paint(canvas, offset + textOffset);
+        /// adjust scale of textOffset
         textPainter.paint(canvas, offset);
       }
     }
@@ -321,6 +329,16 @@ class VecmapPointsDrawer implements VecmapDrawer {
     }
 
     return 'error';
+  }
+
+  static Offset _genTextOffset(
+    TextOffset? textOffset,
+  ) {
+    if (textOffset == null) {
+      return Offset.zero;
+    }
+
+    return Offset(textOffset.x, textOffset.y);
   }
 }
 

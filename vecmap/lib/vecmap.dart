@@ -155,6 +155,7 @@ class DrawStyle {
   final LineWidth? lineWidth;
   final List<dynamic> filter;
   final Map<String, dynamic> textInfo;
+  final TextOffset? textOffset;
   final String? iconImage;
 
   factory DrawStyle(
@@ -164,12 +165,14 @@ class DrawStyle {
   ) {
     final Color color;
     final LineWidth? lineWidth;
+    final TextOffset? textOffset;
     final String? iconImage;
 
     switch (draw.type) {
       case 'fill':
         color = convertColorFromStr(draw.draw['fill-color']);
         lineWidth = null;
+        textOffset = null;
         iconImage = null;
         break;
       case 'line':
@@ -179,32 +182,36 @@ class DrawStyle {
         } else {
           lineWidth = LineWidth(_defaultLineWidth);
         }
+        textOffset = null;
         iconImage = null;
         break;
       case 'symbol':
         color = _genTextColor(draw.draw);
         lineWidth = null;
+        textOffset = _genTextOffset(draw.draw);
         iconImage = draw.draw['icon-image'];
         break;
       default:
         color = _fallbackColor;
         lineWidth = null;
+        textOffset = null;
         iconImage = null;
         break;
     }
 
     return DrawStyle._(
-        color, zoomLevel, lineWidth, filter, draw.info, iconImage);
+        color, zoomLevel, lineWidth, filter, draw.info, textOffset, iconImage);
   }
 
   DrawStyle._(this.color, this.zoomLevel, this.lineWidth, this.filter,
-      this.textInfo, this.iconImage);
+      this.textInfo, this.textOffset, this.iconImage);
   const DrawStyle.defaultStyle()
       : color = Colors.black,
         zoomLevel = const ZoomLevel(1, 15),
         lineWidth = null,
         filter = const [true],
         textInfo = const {},
+        textOffset = null,
         iconImage = null;
 
   static Color _genTextColor(Map<String, dynamic> jsonDraw) {
@@ -214,6 +221,35 @@ class DrawStyle {
     } else {
       return _fallbackColor;
     }
+  }
+
+  static TextOffset? _genTextOffset(Map<String, dynamic> jsonDraw) {
+    const key = 'text-offset';
+
+    if (!jsonDraw.containsKey(key)) {
+      return null;
+    }
+
+    /// "text-offset":"auto"
+    /// or else
+    if (!(jsonDraw[key] is List)) {
+      /// TODO report error
+      return null;
+    }
+
+    final array = jsonDraw[key];
+
+    /// "text-offset":"[expression]"
+    /// TODO parse expression
+    if (!(array[0] is double) || !(array[1] is double)) {
+      return null;
+    }
+
+    /// - "text-offset":[0,-0.1]
+    final doubleArray = jsonDraw[key] as List;
+    final x = doubleArray[0] as double;
+    final y = doubleArray[1] as double;
+    return TextOffset(x, y);
   }
 
   /// <https://docs.mapbox.com/style-spec/reference/types/#color>
@@ -260,6 +296,15 @@ class ZoomLevel {
   @override
   String toString() {
     return 'minzoom: $minzoom, maxzoom: $maxzoom';
+  }
+
+  bool isWithin(double curZoomLevel) {
+    final flooredZoomLevel = curZoomLevel.floor();
+    if (flooredZoomLevel < minzoom || flooredZoomLevel > maxzoom) {
+      return false;
+    }
+
+    return true;
   }
 }
 
@@ -328,8 +373,16 @@ class LineWidth {
   }
 }
 
+class TextOffset {
+  final double x;
+  final double y;
+
+  TextOffset(this.x, this.y);
+}
+
 DrawStyle? getDrawStyle(
   List<DrawStyle>? drawStyles,
+  double curZoomLevel,
   Tile_Feature feature,
   Map<String, Tile_Value> featureTags,
 ) {
@@ -337,9 +390,12 @@ DrawStyle? getDrawStyle(
     return null;
   }
 
-  final drawStyle = drawStyles.where((drawStyle) {
-    return exeFilterExpresstions(featureTags, drawStyle.filter);
-  }).firstOrNull;
+  final drawStyle = drawStyles
+      .where((drawStyle) {
+        return exeFilterExpresstions(featureTags, drawStyle.filter);
+      })
+      .where((drawStyle) => drawStyle.zoomLevel.isWithin(curZoomLevel))
+      .firstOrNull;
 
   final DrawStyle? ret;
   if (drawStyle != null) {
