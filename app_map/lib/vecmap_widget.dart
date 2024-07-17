@@ -207,6 +207,140 @@ class _DemoState extends State<Demo> {
   }
 }
 
+class _MapTextPainter {
+  final TextPainter? textPainter;
+  final Offset textOffset;
+
+  factory _MapTextPainter(
+    String? dispText,
+    Color dispTextColor,
+    Map<String, Tile_Value> tags,
+    DrawStyle drawStyle,
+    ui.Image? image,
+  ) {
+    if (dispText == null) {
+      return _MapTextPainter.NoPaint();
+    }
+
+    final textStyle =
+        TextStyle(color: dispTextColor, fontSize: 20, fontFamily: 'NotoSansJP');
+
+    final textSpan = TextSpan(
+      text: dispText,
+      style: textStyle,
+    );
+
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: 100,
+    );
+
+    /// adjust scale of textOffset
+    Offset textOffset = Offset.zero;
+    textOffset = _addTextOffset(textOffset, drawStyle.textOffset);
+    textOffset = _addDspPos(textOffset, tags['dspPos'], textPainter, image);
+
+    return _MapTextPainter._(textPainter, textOffset);
+  }
+
+  _MapTextPainter._(this.textPainter, this.textOffset);
+  _MapTextPainter.NoPaint()
+      : textPainter = null,
+        textOffset = Offset.zero;
+
+  void paint(Canvas canvas, Offset offset) {
+    if (textPainter != null) {
+      textPainter!.paint(canvas, offset + textOffset);
+    }
+  }
+
+  static Offset _addTextOffset(
+    Offset offset,
+    TextOffset? textOffset,
+  ) {
+    if (textOffset == null) {
+      return offset;
+    }
+
+    return offset.translate(textOffset.x, textOffset.y);
+  }
+
+  static Offset _addDspPos(
+    Offset offset,
+    Tile_Value? dspPos,
+    TextPainter textPainter,
+    ui.Image? image,
+  ) {
+    if (dspPos == null) {
+      return offset;
+    }
+
+    if (image == null) {
+      return offset;
+    }
+
+    double textWidthHalf = textPainter.width / 2.0;
+    double textHeightHalf = textPainter.height / 2.0;
+    double imageWidth = image.width.toDouble();
+    double imageheight = image.height.toDouble();
+
+    /// dspPos
+    /// RB--CB--LB
+    /// |   |   |
+    /// RC--CC--LC
+    /// |   |   |
+    /// RT--CT--LT
+    final double dx;
+    final double dy;
+    switch (dspPos.stringValue) {
+      case 'LT':
+        dx = imageWidth;
+        dy = imageheight;
+        break;
+      case 'CT':
+        dx = imageWidth / 2.0;
+        dy = imageheight;
+        break;
+      case 'RT':
+        dx = 0.0;
+        dy = imageheight;
+        break;
+      case 'LC':
+        dx = imageWidth;
+        dy = imageheight / 2.0;
+        break;
+      case 'CC':
+        dx = (imageWidth / 2.0) - textWidthHalf;
+        dy = (imageheight / 2.0) - textHeightHalf;
+        break;
+      case 'RC':
+        dx = 0.0;
+        dy = imageheight / 2.0;
+        break;
+      case 'LB':
+        dx = imageWidth;
+        dy = 0.0;
+        break;
+      case 'CB':
+        dx = imageWidth / 2.0;
+        dy = 0.0;
+        break;
+      case 'RB':
+      default:
+        dx = 0.0;
+        dy = 0.0;
+        break;
+    }
+
+    return offset.translate(dx, dy);
+  }
+}
+
 abstract class VecmapDrawer {
   void vecmapDraw(Canvas canvas);
 }
@@ -214,10 +348,9 @@ abstract class VecmapDrawer {
 /// https://github.com/mapbox/vector-tile-spec/blob/master/2.1/README.md#4352-example-multi-point
 class VecmapPointsDrawer implements VecmapDrawer {
   final Paint paint;
-  final TextPainter textPainter;
   final List<Offset> offsets;
-  final Offset textOffset;
   final ui.Image? iconImage;
+  final _MapTextPainter mapTextPainter;
   final Map<String, Tile_Value> tags;
 
   factory VecmapPointsDrawer(
@@ -232,26 +365,7 @@ class VecmapPointsDrawer implements VecmapDrawer {
       ..strokeWidth = 10.0
       ..color = Colors.blueAccent;
 
-    final textStyle = TextStyle(
-        color: drawStyle.color, fontSize: 20, fontFamily: 'NotoSansJP');
-
-    final String? dispText = _genDispText(tags, drawStyle.textInfo);
-    final Offset textOffset = _genTextOffset(drawStyle.textOffset);
-
-    final textSpan = TextSpan(
-      text: dispText,
-      style: textStyle,
-    );
-
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout(
-      minWidth: 0,
-      maxWidth: 100,
-    );
-
+    /// image
     final ui.Image? image;
     if (mapIconImage.containsKey(drawStyle.iconImage)) {
       image = mapIconImage[drawStyle.iconImage];
@@ -260,6 +374,17 @@ class VecmapPointsDrawer implements VecmapDrawer {
       image = null;
     }
 
+    /// text
+    final String? dispText = _genDispText(tags, drawStyle.textInfo);
+    final _MapTextPainter mapTextPainter;
+    if (dispText != null) {
+      mapTextPainter =
+          _MapTextPainter(dispText, drawStyle.color, tags, drawStyle, image);
+    } else {
+      mapTextPainter = _MapTextPainter.NoPaint();
+    }
+
+    /// position of symbols
     final List<Offset> offsets = List.empty(growable: true);
     for (var command in commands) {
       if (command.commandType == GeometryCommandType.moveTo) {
@@ -275,34 +400,27 @@ class VecmapPointsDrawer implements VecmapDrawer {
       }
     }
 
-    return VecmapPointsDrawer._(
-        paint, textPainter, offsets, textOffset, image, tags);
+    return VecmapPointsDrawer._(paint, offsets, image, mapTextPainter, tags);
   }
 
   VecmapPointsDrawer._(
     this.paint,
-    this.textPainter,
     this.offsets,
-    this.textOffset,
     this.iconImage,
+    this.mapTextPainter,
     this.tags,
   );
 
   @override
   void vecmapDraw(Canvas canvas) {
-    // TODO draw internal text of icon. apply text offset
-
     if (iconImage == null) {
       for (var offset in offsets) {
-        textPainter.paint(canvas, offset);
+        mapTextPainter.paint(canvas, offset);
       }
     } else {
       for (var offset in offsets) {
         canvas.drawImage(iconImage!, offset, paint);
-
-        /// TODO textPainter.paint(canvas, offset + textOffset);
-        /// adjust scale of textOffset
-        textPainter.paint(canvas, offset);
+        mapTextPainter.paint(canvas, offset);
       }
     }
   }
@@ -329,16 +447,6 @@ class VecmapPointsDrawer implements VecmapDrawer {
     }
 
     return 'error';
-  }
-
-  static Offset _genTextOffset(
-    TextOffset? textOffset,
-  ) {
-    if (textOffset == null) {
-      return Offset.zero;
-    }
-
-    return Offset(textOffset.x, textOffset.y);
   }
 }
 
