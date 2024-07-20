@@ -436,6 +436,75 @@ const int _filterOperatorIndex = 0;
 const int _filterkeyIndex = 1;
 const int _filtervalueIndex = 2;
 
+List<int> splitSignedStrValueBy1G(String str) {
+  /// split 1giga length. 1giga length is 10.
+  const int oneGigaLen = 10;
+
+  /// generate list max index
+  final int genLen = ((str.length - 1) ~/ oneGigaLen) + 1;
+
+  final List<int> splitedlist = List.empty(growable: true);
+  for (int i = 0; i < genLen; i++) {
+    final subStart = i * oneGigaLen;
+    final subExpectEnd = subStart + oneGigaLen;
+    final subEnd;
+    if (subExpectEnd < str.length) {
+      subEnd = subExpectEnd;
+    } else {
+      subEnd = str.length;
+    }
+
+    final subStr = str.substring(subStart, subEnd);
+    final intValue = int.tryParse(subStr);
+    if (intValue == null) {
+      return List.empty();
+    }
+
+    if (splitedlist.isEmpty && (intValue == 0)) {
+      /// ex) str: 00000000001
+      continue;
+    }
+
+    splitedlist.add(intValue);
+  }
+
+  if (splitedlist.isEmpty) {
+    /// ex) str: 000
+    return const [0];
+  }
+
+  return List.unmodifiable(splitedlist);
+}
+
+int compareStringSignedValue(String str1, String str2) {
+  /// ex1)
+  /// str1: 001234
+  /// str2: 01235
+  final List<int> str1Splited = splitSignedStrValueBy1G(str1);
+  final List<int> str2Splited = splitSignedStrValueBy1G(str2);
+
+  if (str1Splited.length > str2Splited.length) {
+    return 1;
+  }
+
+  if (str1Splited.length > str2Splited.length) {
+    return -1;
+  }
+
+  for (int i = 0; i < str1Splited.length; i++) {
+    if (str1Splited[i] > str2Splited[i]) {
+      return 1;
+    }
+
+    if (str1Splited[i] < str2Splited[i]) {
+      return -1;
+    }
+  }
+
+  /// same value
+  return 0;
+}
+
 bool exeFilterExpresstion(Map<String, Tile_Value> tags, dynamic filterExp) {
   if (filterExp is bool) {
     return filterExp;
@@ -461,6 +530,56 @@ bool exeFilterExpresstion(Map<String, Tile_Value> tags, dynamic filterExp) {
           } else if (filterValue is int) {
             return tags[filterExp[_filterkeyIndex]]!.intValue != filterValue;
           }
+        }
+        break;
+      case '>=':
+
+        /// get tagValue
+        if (tags[filterExp[_filterkeyIndex]] == null) {
+          break;
+        }
+        final tagValue = tags[filterExp[_filterkeyIndex]];
+
+        /// get filterVaule
+        final filterValue = filterExp[_filtervalueIndex];
+
+        /// result of expression
+        if (filterValue is String) {
+          final ret =
+              compareStringSignedValue(tagValue!.stringValue, filterValue);
+          if (ret >= 0) {
+            return true;
+          }
+          return false;
+        }
+
+        if (filterValue is int) {
+          return tagValue!.intValue >= filterValue;
+        }
+        break;
+      case '<':
+
+        /// get tagValue
+        if (tags[filterExp[_filterkeyIndex]] == null) {
+          break;
+        }
+        final tagValue = tags[filterExp[_filterkeyIndex]];
+
+        /// get filterVaule
+        final filterValue = filterExp[_filtervalueIndex];
+
+        /// result of expression
+        if (filterValue is String) {
+          final ret =
+              compareStringSignedValue(tagValue!.stringValue, filterValue);
+          if (ret < 0) {
+            return true;
+          }
+          return false;
+        }
+
+        if (filterValue is int) {
+          return tagValue!.intValue < filterValue;
         }
         break;
       case 'in':
@@ -496,6 +615,16 @@ bool exeFilterExpresstion(Map<String, Tile_Value> tags, dynamic filterExp) {
           }
         }
         break;
+      case 'has':
+        if (tags[filterExp[_filterkeyIndex]] != null) {
+          return true;
+        }
+        break;
+      case '!has':
+        if (tags[filterExp[_filterkeyIndex]] == null) {
+          return true;
+        }
+        break;
       default:
     }
   }
@@ -504,6 +633,7 @@ bool exeFilterExpresstion(Map<String, Tile_Value> tags, dynamic filterExp) {
   return false;
 }
 
+/// recurcive
 bool exeFilterExpresstions(Map<String, Tile_Value> tags, dynamic filterExp) {
   if (filterExp is bool) {
     return filterExp;
@@ -515,7 +645,7 @@ bool exeFilterExpresstions(Map<String, Tile_Value> tags, dynamic filterExp) {
       case 'all':
         ret = true;
         for (int i = 1; i < filterExp.length; i++) {
-          if (exeFilterExpresstion(tags, filterExp[i]) == false) {
+          if (exeFilterExpresstions(tags, filterExp[i]) == false) {
             ret = false;
             break;
           }
@@ -524,7 +654,7 @@ bool exeFilterExpresstions(Map<String, Tile_Value> tags, dynamic filterExp) {
       case 'any':
         ret = false;
         for (int i = 1; i < filterExp.length; i++) {
-          if (exeFilterExpresstion(tags, filterExp[i]) == true) {
+          if (exeFilterExpresstions(tags, filterExp[i]) == true) {
             ret = true;
             break;
           }

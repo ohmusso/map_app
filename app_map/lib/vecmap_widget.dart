@@ -15,6 +15,8 @@ import 'input_latlng_widget.dart';
 /// 緯度経度から地図の座標を計算したり、その逆を行うために使用する
 final _epsg = EPSG4326();
 
+/// TODO line-dasharray JRの線路のしましま
+
 Future<Tile> getTileFromPbf(
   int zoomLevel,
   int x,
@@ -138,10 +140,11 @@ class _DemoState extends State<Demo> {
       return List.empty();
     }
 
+    final drawStyles = mapDrawStyles[layer.name];
+
     List<VecmapDrawer> drawers = List.empty(growable: true);
     for (var feature in layer.features) {
       final featureTags = genFeatureTags(layer, feature);
-      final drawStyles = mapDrawStyles[layer.name];
       final drawStyle =
           getDrawStyle(drawStyles, zoomLevel, feature, featureTags);
 

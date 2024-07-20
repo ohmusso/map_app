@@ -253,6 +253,111 @@ void main() {
       expect(ret, false);
     });
 
+    test('compareStringSignedValue', () async {
+      var str1;
+      var str2;
+      var ret;
+
+      str1 = '123';
+      str2 = '123';
+      ret = compareStringSignedValue(str1, str2);
+      expect(ret, 0);
+    });
+
+    test('filter >=, stringValue', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"1":"2901"}'),
+        'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+      };
+
+      bool ret;
+      ret = exeFilterExpresstion(tags, [">=", "annoCtg", "0"]);
+      expect(ret, true);
+
+      ret = exeFilterExpresstion(tags, [">=", "annoCtg", "2900"]);
+      expect(ret, true);
+
+      ret = exeFilterExpresstion(tags, [">=", "annoCtg", "2901"]);
+      expect(ret, true);
+
+      ret = exeFilterExpresstion(tags, [">=", "annoCtg", "2902"]);
+      expect(ret, false);
+    });
+
+    test('filter >=, intValue', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
+        'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+      };
+
+      final ret = exeFilterExpresstion(tags, [">=", "annoCtg", 0]);
+      expect(ret, true);
+    });
+
+    test('filter <, stringValue', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"1":"2901"}'),
+        'rtCode1': Tile_Value.fromJson('{"1":"40203800001"}'),
+        'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+      };
+
+      bool ret;
+      ret = exeFilterExpresstion(tags, ["<", "annoCtg", "0"]);
+      expect(ret, false);
+
+      ret = exeFilterExpresstion(tags, ["<", "annoCtg", "2900"]);
+      expect(ret, false);
+
+      ret = exeFilterExpresstion(tags, ["<", "annoCtg", "2901"]);
+      expect(ret, false);
+
+      ret = exeFilterExpresstion(tags, ["<", "annoCtg", "2902"]);
+      expect(ret, true);
+
+      ret = exeFilterExpresstion(tags, [">=", "rtCode1", "40203800002"]);
+      expect(ret, true);
+    });
+
+    test('filter <, intValue', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
+        'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+      };
+
+      final ret = exeFilterExpresstion(tags, ["<", "annoCtg", 0]);
+      expect(ret, false);
+    });
+
+    test('filter has', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
+        'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+      };
+
+      bool ret;
+
+      ret = exeFilterExpresstion(tags, ["has", "annoCtg"]);
+      expect(ret, true);
+
+      ret = exeFilterExpresstion(tags, ["has", "ftCode"]);
+      expect(ret, false);
+    });
+
+    test('filter !has', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
+        'name': Tile_Value.fromJson('{"1":"hogehoge"}'),
+      };
+
+      bool ret;
+
+      ret = exeFilterExpresstion(tags, ["!has", "annoCtg"]);
+      expect(ret, false);
+
+      ret = exeFilterExpresstion(tags, ["!has", "ftCode"]);
+      expect(ret, true);
+    });
+
     test('filter in, stringValue', () async {
       final Map<String, Tile_Value> tags = {
         'annoCtg': Tile_Value.fromJson('{"4":"2901"}'),
@@ -277,6 +382,18 @@ void main() {
       ]);
       expect(ret, true);
     });
+
+    test('filter in, ints', () async {
+      final Map<String, Tile_Value> tags = {
+        'annoCtg': Tile_Value.fromJson('{"4":"3"}'),
+        'name': Tile_Value.fromJson('{"1":"fugafuga"}'),
+      };
+
+      final ret = exeFilterExpresstion(tags, ["in", "annoCtg", 1, 2, 3]);
+      expect(ret, true);
+    });
+
+//"filter":["all",["in","ftCode",8201],["==","snglDbl",2],["in","railState",0,200],["any",["==","staCode","0"],["!has","staCode"]],["any",["all",[">=","rtCode1","40203000000"],["<","rtCode1","40204000000"]],["all",[">=","rtCode","40203000000"],["<","rtCode","40204000000"]]]]
 
     test('filter in, some int', () async {
       final Map<String, Tile_Value> tags = {
