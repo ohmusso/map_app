@@ -153,10 +153,6 @@ class _DemoState extends State<Demo> {
         continue;
       }
 
-      // if (layer.name == 'railway') {
-      //   print(drawStyle.lineDashArray);
-      // }
-
       final commands = GeometryCommand.newCommands(feature.geometry);
       switch (feature.type) {
         case Tile_GeomType.POINT:
@@ -216,6 +212,34 @@ class _DemoState extends State<Demo> {
         ),
       ],
     );
+  }
+}
+
+class _LineDash {
+  final double solidLen;
+  final double spanLen;
+  final double totalLen;
+  const _LineDash(this.solidLen, this.spanLen) : totalLen = solidLen + spanLen;
+
+  /// https://docs.mapbox.com/style-spec/reference/layers/#paint-line-line-dasharray
+  static List<_LineDash> genListFromDashArray(
+      List<double> dashArray, double lineWidth) {
+    if (dashArray.isEmpty) {
+      return List.empty();
+    }
+
+    if ((dashArray.length % 2) != 0) {
+      return List.empty();
+    }
+
+    /// TODO is there better way? join 2 element to 1 element
+    final listLen = dashArray.length ~/ 2;
+    return List.generate(listLen, (int i) {
+      final i2 = i * 2;
+      final solidLen = dashArray[i2] * lineWidth;
+      final spanLen = dashArray[i2 + 1] * lineWidth;
+      return _LineDash(solidLen, spanLen);
+    });
   }
 }
 
@@ -493,10 +517,49 @@ class VecmapLinestringDrawer implements VecmapDrawer {
       }
     }
 
-    return VecmapLinestringDrawer._(paint, path);
+    if (drawStyle.lineDashArray == null) {
+      return VecmapLinestringDrawer._(paint, path);
+    } else {
+      final dashedPath = _convertDashLine(
+          path, drawStyle.lineDashArray!, drawStyle.lineWidth!);
+      return VecmapLinestringDrawer._(paint, dashedPath);
+    }
   }
 
   VecmapLinestringDrawer._(this.paint, this.path);
+
+  static Path _convertDashLine(
+      Path path, List<double> dashArray, LineWidth lineWidth) {
+    final dashList =
+        _LineDash.genListFromDashArray(dashArray, lineWidth.getWidth());
+
+    if (dashList.isEmpty) {
+      return path;
+    }
+
+    final dashLength =
+        dashList.map((e) => e.totalLen).reduce((sum, element) => sum + element);
+    final ui.PathMetrics pms = path.computeMetrics();
+    final Path dashedPath = Path();
+    for (var pm in pms) {
+      final int dashNum = pm.length ~/ dashLength;
+      for (int i = 0; i < dashNum; i++) {
+        double curPathLen = dashLength * i;
+        for (var dash in dashList) {
+          dashedPath.addPath(
+              pm.extractPath(curPathLen, curPathLen + dash.solidLen),
+              Offset.zero);
+          curPathLen += dash.totalLen;
+        }
+      }
+
+      final double tail = pm.length % dashLength;
+      dashedPath.addPath(
+          pm.extractPath(pm.length - tail, pm.length), Offset.zero);
+    }
+
+    return dashedPath;
+  }
 
   @override
   void vecmapDraw(Canvas canvas) {

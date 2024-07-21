@@ -159,8 +159,6 @@ class DrawStyle {
   final TextOffset? textOffset;
   final String? iconImage;
 
-//line-dasharray
-
   factory DrawStyle(
     TileStyleDraw draw,
     ZoomLevel zoomLevel,
