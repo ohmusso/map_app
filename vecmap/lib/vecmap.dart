@@ -153,10 +153,13 @@ class DrawStyle {
   final Color color;
   final ZoomLevel zoomLevel;
   final LineWidth? lineWidth;
+  final List<double>? lineDashArray;
   final List<dynamic> filter;
   final Map<String, dynamic> textInfo;
   final TextOffset? textOffset;
   final String? iconImage;
+
+//line-dasharray
 
   factory DrawStyle(
     TileStyleDraw draw,
@@ -165,6 +168,7 @@ class DrawStyle {
   ) {
     final Color color;
     final LineWidth? lineWidth;
+    final List<double>? lineDashArray;
     final TextOffset? textOffset;
     final String? iconImage;
 
@@ -172,6 +176,7 @@ class DrawStyle {
       case 'fill':
         color = convertColorFromStr(draw.draw['fill-color']);
         lineWidth = null;
+        lineDashArray = null;
         textOffset = null;
         iconImage = null;
         break;
@@ -182,37 +187,55 @@ class DrawStyle {
         } else {
           lineWidth = LineWidth(_defaultLineWidth);
         }
+        lineDashArray = _getLineDashArray(draw.draw['line-dasharray']);
         textOffset = null;
         iconImage = null;
         break;
       case 'symbol':
         color = _genTextColor(draw.draw);
         lineWidth = null;
+        lineDashArray = null;
         textOffset = _genTextOffset(draw.draw);
         iconImage = draw.draw['icon-image'];
         break;
       default:
         color = _fallbackColor;
         lineWidth = null;
+        lineDashArray = null;
         textOffset = null;
         iconImage = null;
         break;
     }
 
-    return DrawStyle._(
-        color, zoomLevel, lineWidth, filter, draw.info, textOffset, iconImage);
+    return DrawStyle._(color, zoomLevel, lineWidth, lineDashArray, filter,
+        draw.info, textOffset, iconImage);
   }
 
-  DrawStyle._(this.color, this.zoomLevel, this.lineWidth, this.filter,
-      this.textInfo, this.textOffset, this.iconImage);
+  DrawStyle._(this.color, this.zoomLevel, this.lineWidth, this.lineDashArray,
+      this.filter, this.textInfo, this.textOffset, this.iconImage);
   const DrawStyle.defaultStyle()
       : color = Colors.black,
         zoomLevel = const ZoomLevel(1, 15),
         lineWidth = null,
+        lineDashArray = null,
         filter = const [true],
         textInfo = const {},
         textOffset = null,
         iconImage = null;
+
+  static List<double>? _getLineDashArray(List<dynamic>? array) {
+    if (array == null) {
+      return null;
+    }
+
+    return array.map((e) {
+      if (e is double) {
+        return e;
+      }
+
+      return (e as int).toDouble();
+    }).toList();
+  }
 
   static Color _genTextColor(Map<String, dynamic> jsonDraw) {
     const key = 'text-color';
@@ -380,31 +403,22 @@ class TextOffset {
   TextOffset(this.x, this.y);
 }
 
-DrawStyle? getDrawStyle(
+List<DrawStyle> getDrawStyles(
   List<DrawStyle>? drawStyles,
   double curZoomLevel,
   Tile_Feature feature,
   Map<String, Tile_Value> featureTags,
 ) {
   if (drawStyles == null) {
-    return null;
+    return List.empty();
   }
 
-  final drawStyle = drawStyles
+  return drawStyles
       .where((drawStyle) {
         return exeFilterExpresstions(featureTags, drawStyle.filter);
       })
       .where((drawStyle) => drawStyle.zoomLevel.isWithin(curZoomLevel))
-      .firstOrNull;
-
-  final DrawStyle? ret;
-  if (drawStyle != null) {
-    ret = drawStyle;
-  } else {
-    ret = null;
-  }
-
-  return ret;
+      .toList();
 }
 
 Tile_Layer? getLayer(Tile tile, String layerName) {

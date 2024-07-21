@@ -145,26 +145,35 @@ class _DemoState extends State<Demo> {
     List<VecmapDrawer> drawers = List.empty(growable: true);
     for (var feature in layer.features) {
       final featureTags = genFeatureTags(layer, feature);
-      final drawStyle =
-          getDrawStyle(drawStyles, zoomLevel, feature, featureTags);
+      final styles = getDrawStyles(drawStyles, zoomLevel, feature, featureTags);
 
-      if (drawStyle == null) {
+      if (styles.isEmpty) {
         // style is not found, do not draw
         // TODO report not found style
         continue;
       }
 
+      // if (layer.name == 'railway') {
+      //   print(drawStyle.lineDashArray);
+      // }
+
       final commands = GeometryCommand.newCommands(feature.geometry);
       switch (feature.type) {
         case Tile_GeomType.POINT:
-          drawers.add(VecmapPointsDrawer(
-              commands, drawStyle, _mapIconImage, featureTags));
+          for (var style in styles) {
+            drawers.add(VecmapPointsDrawer(
+                commands, style, _mapIconImage, featureTags));
+          }
           break;
         case Tile_GeomType.LINESTRING:
-          drawers.add(VecmapLinestringDrawer(commands, drawStyle));
+          for (var style in styles) {
+            drawers.add(VecmapLinestringDrawer(commands, style));
+          }
           break;
         case Tile_GeomType.POLYGON:
-          drawers.add(VecmapPolygonDrawer(commands, drawStyle));
+          for (var style in styles) {
+            drawers.add(VecmapPolygonDrawer(commands, style));
+          }
           break;
         default:
       }
