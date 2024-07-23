@@ -15,8 +15,6 @@ import 'input_latlng_widget.dart';
 /// 緯度経度から地図の座標を計算したり、その逆を行うために使用する
 final _epsg = EPSG4326();
 
-/// TODO line-dasharray JRの線路のしましま
-
 Future<Tile> getTileFromPbf(
   int zoomLevel,
   int x,
@@ -521,7 +519,7 @@ class VecmapLinestringDrawer implements VecmapDrawer {
       return VecmapLinestringDrawer._(paint, path);
     } else {
       final dashedPath = _convertDashLine(
-          path, drawStyle.lineDashArray!, drawStyle.lineWidth!);
+          path, drawStyle.lineDashArray!, drawStyle.lineWidth!.getWidth());
       return VecmapLinestringDrawer._(paint, dashedPath);
     }
   }
@@ -529,9 +527,8 @@ class VecmapLinestringDrawer implements VecmapDrawer {
   VecmapLinestringDrawer._(this.paint, this.path);
 
   static Path _convertDashLine(
-      Path path, List<double> dashArray, LineWidth lineWidth) {
-    final dashList =
-        _LineDash.genListFromDashArray(dashArray, lineWidth.getWidth());
+      Path path, List<double> dashArray, double lineWidth) {
+    final dashList = _LineDash.genListFromDashArray(dashArray, lineWidth);
 
     if (dashList.isEmpty) {
       return path;
