@@ -11,6 +11,8 @@ import 'grid_widget.dart';
 import 'webapi.dart';
 import 'input_latlng_widget.dart';
 
+/// TODO draw feature in order by group id
+
 /// package:latlng 地図の空間座標系
 /// 緯度経度から地図の座標を計算したり、その逆を行うために使用する
 final _epsg = EPSG4326();
@@ -83,40 +85,9 @@ class _DemoState extends State<Demo> {
 
     print('generate drawer');
     List<VecmapDrawer> drawers = List.empty(growable: true);
-    Tile_Layer? layer;
-    layer = tile.layers.where((layer) => layer.name == 'waterarea').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
-
-    layer =
-        tile.layers.where((layer) => layer.name == 'wstructurea').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
-
-    layer = tile.layers.where((layer) => layer.name == 'boundary').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
-
-    layer = tile.layers.where((layer) => layer.name == 'label').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
-
-    layer = tile.layers.where((layer) => layer.name == 'elevation').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
-
-    layer = tile.layers.where((layer) => layer.name == 'river').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
-
-    layer = tile.layers.where((layer) => layer.name == 'road').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
-
-    layer = tile.layers.where((layer) => layer.name == 'railway').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
-
-    layer = tile.layers.where((layer) => layer.name == 'transp').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
-
-    layer = tile.layers.where((layer) => layer.name == 'landforma').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
-
-    layer = tile.layers.where((layer) => layer.name == 'symbol').firstOrNull;
-    drawers.addAll(_genDrawer(layer));
+    for (var layer in tile.layers) {
+      drawers.addAll(_genDrawer(layer));
+    }
 
     painter = MyPainter(drawers, vnPosition: vnPosition);
     vnPosition.value = Offset.zero;
@@ -140,6 +111,10 @@ class _DemoState extends State<Demo> {
 
     final drawStyles = mapDrawStyles[layer.name];
 
+    if (drawStyles == null) {
+      return List.empty();
+    }
+
     List<VecmapDrawer> drawers = List.empty(growable: true);
     for (var feature in layer.features) {
       final featureTags = genFeatureTags(layer, feature);
@@ -152,24 +127,22 @@ class _DemoState extends State<Demo> {
       }
 
       final commands = GeometryCommand.newCommands(feature.geometry);
-      switch (feature.type) {
-        case Tile_GeomType.POINT:
-          for (var style in styles) {
+
+      for (var style in styles) {
+        switch (style.drawType) {
+          case 'fill':
+            drawers.add(VecmapPolygonDrawer(commands, style));
+            break;
+          case 'line':
+            drawers.add(VecmapLinestringDrawer(commands, style));
+            break;
+          case 'symbol':
             drawers.add(VecmapPointsDrawer(
                 commands, style, _mapIconImage, featureTags));
-          }
-          break;
-        case Tile_GeomType.LINESTRING:
-          for (var style in styles) {
-            drawers.add(VecmapLinestringDrawer(commands, style));
-          }
-          break;
-        case Tile_GeomType.POLYGON:
-          for (var style in styles) {
-            drawers.add(VecmapPolygonDrawer(commands, style));
-          }
-          break;
-        default:
+            break;
+          default:
+            break;
+        }
       }
     }
 
@@ -493,6 +466,10 @@ class VecmapLinestringDrawer implements VecmapDrawer {
     List<GeometryCommand> commands,
     DrawStyle drawStyle,
   ) {
+    if (drawStyle.drawType == 'symbol') {
+      return VecmapLinestringDrawer._(Paint(), Path());
+    }
+
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = drawStyle.lineWidth!.getWidth()

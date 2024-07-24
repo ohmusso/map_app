@@ -150,6 +150,7 @@ const Color _fallbackColor = Color.fromARGB(100, 100, 100, 100);
 const double _defaultLineWidth = 10.0;
 
 class DrawStyle {
+  final String drawType;
   final Color color;
   final ZoomLevel zoomLevel;
   final LineWidth? lineWidth;
@@ -164,12 +165,14 @@ class DrawStyle {
     ZoomLevel zoomLevel,
     List<dynamic> filter,
   ) {
+    final String drawType;
     final Color color;
     final LineWidth? lineWidth;
     final List<double>? lineDashArray;
     final TextOffset? textOffset;
     final String? iconImage;
 
+    drawType = draw.type;
     switch (draw.type) {
       case 'fill':
         color = convertColorFromStr(draw.draw['fill-color']);
@@ -205,14 +208,23 @@ class DrawStyle {
         break;
     }
 
-    return DrawStyle._(color, zoomLevel, lineWidth, lineDashArray, filter,
-        draw.info, textOffset, iconImage);
+    return DrawStyle._(drawType, color, zoomLevel, lineWidth, lineDashArray,
+        filter, draw.info, textOffset, iconImage);
   }
 
-  DrawStyle._(this.color, this.zoomLevel, this.lineWidth, this.lineDashArray,
-      this.filter, this.textInfo, this.textOffset, this.iconImage);
+  DrawStyle._(
+      this.drawType,
+      this.color,
+      this.zoomLevel,
+      this.lineWidth,
+      this.lineDashArray,
+      this.filter,
+      this.textInfo,
+      this.textOffset,
+      this.iconImage);
   const DrawStyle.defaultStyle()
-      : color = Colors.black,
+      : drawType = '',
+        color = Colors.black,
         zoomLevel = const ZoomLevel(1, 15),
         lineWidth = null,
         lineDashArray = null,
