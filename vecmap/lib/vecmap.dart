@@ -101,7 +101,18 @@ class DrawStyleGenerator {
   DrawStyleGenerator(this.tileStyle);
 
   /// key is source-layer
-  Map<String, List<DrawStyle>> genDrawStyles() {
+  VecmapDrawStyle genVecmapDrawStyle() {
+    final groupIds = genGroupIds(tileStyle);
+    final mapDrawStyles = _genMapDrawStyle(tileStyle);
+
+    return VecmapDrawStyle(groupIds, mapDrawStyles);
+  }
+
+  static List<String> genGroupIds(TileStyle tileStyle) {
+    return tileStyle.group.map((group) => group.id).toList();
+  }
+
+  static Map<String, List<DrawStyle>> _genMapDrawStyle(TileStyle tileStyle) {
     final mapNameItem = getItemNamesFromStyle(tileStyle);
     final mapDrawStyles = Map<String, List<DrawStyle>>.new();
 
@@ -109,6 +120,7 @@ class DrawStyleGenerator {
     for (var nameItem in mapNameItem.entries) {
       List<dynamic> filter =
           nameItem.value.filter == null ? [true] : nameItem.value.filter!;
+
       for (var layerElement in nameItem.value.list) {
         final layer = layerElement as TileStyleLayer;
         final draws = getTileStyleDrawFromLayer(layer);
@@ -130,13 +142,16 @@ class DrawStyleGenerator {
             sourceLayer = layerName;
           }
 
+          /// add style
+          final List<String> groupIds = nameItem.value.group;
+          final ZoomLevel zoomLevel = ZoomLevel(layer.minzoom, layer.maxzoom);
           if (mapDrawStyles.containsKey(sourceLayer)) {
-            mapDrawStyles[sourceLayer]!.add(DrawStyle(
-                draw, ZoomLevel(layer.minzoom, layer.maxzoom), filter));
+            mapDrawStyles[sourceLayer]!
+                .add(DrawStyle(groupIds, draw, zoomLevel, filter));
           } else {
             mapDrawStyles[sourceLayer] = List.empty(growable: true);
-            mapDrawStyles[sourceLayer]!.add(DrawStyle(
-                draw, ZoomLevel(layer.minzoom, layer.maxzoom), filter));
+            mapDrawStyles[sourceLayer]!
+                .add(DrawStyle(groupIds, draw, zoomLevel, filter));
           }
         }
       }
@@ -149,8 +164,19 @@ class DrawStyleGenerator {
 const Color _fallbackColor = Color.fromARGB(100, 100, 100, 100);
 const double _defaultLineWidth = 10.0;
 
+class VecmapDrawStyle {
+  final List<String> groupIds;
+  final Map<String, List<DrawStyle>> styles;
+  VecmapDrawStyle(this.groupIds, this.styles);
+
+  VecmapDrawStyle.NoStyle()
+      : groupIds = List.empty(),
+        styles = {};
+}
+
 class DrawStyle {
   final String drawType;
+  final List<String> groupIds;
   final Color color;
   final ZoomLevel zoomLevel;
   final LineWidth? lineWidth;
@@ -161,6 +187,7 @@ class DrawStyle {
   final String? iconImage;
 
   factory DrawStyle(
+    final List<String> groupIds,
     TileStyleDraw draw,
     ZoomLevel zoomLevel,
     List<dynamic> filter,
@@ -208,12 +235,13 @@ class DrawStyle {
         break;
     }
 
-    return DrawStyle._(drawType, color, zoomLevel, lineWidth, lineDashArray,
-        filter, draw.info, textOffset, iconImage);
+    return DrawStyle._(drawType, groupIds, color, zoomLevel, lineWidth,
+        lineDashArray, filter, draw.info, textOffset, iconImage);
   }
 
   DrawStyle._(
       this.drawType,
+      this.groupIds,
       this.color,
       this.zoomLevel,
       this.lineWidth,
@@ -224,6 +252,7 @@ class DrawStyle {
       this.iconImage);
   const DrawStyle.defaultStyle()
       : drawType = '',
+        groupIds = const [],
         color = Colors.black,
         zoomLevel = const ZoomLevel(1, 15),
         lineWidth = null,

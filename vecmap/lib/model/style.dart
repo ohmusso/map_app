@@ -36,6 +36,7 @@ class TileStyleElement with _$TileStyleElement {
   const factory TileStyleElement.item(
     String title,
     List<TileStyleElement> list,
+    List<String> group,
     int? zIndex,
     List<dynamic>? filter,
   ) = TileStyleItem;

@@ -49,6 +49,7 @@ _$TileStyleItemImpl _$$TileStyleItemImplFromJson(Map<String, dynamic> json) =>
       (json['list'] as List<dynamic>)
           .map((e) => TileStyleElement.fromJson(e as Map<String, dynamic>))
           .toList(),
+      (json['group'] as List<dynamic>).map((e) => e as String).toList(),
       (json['zIndex'] as num?)?.toInt(),
       json['filter'] as List<dynamic>?,
       $type: json['type'] as String?,
@@ -58,6 +59,7 @@ Map<String, dynamic> _$$TileStyleItemImplToJson(_$TileStyleItemImpl instance) =>
     <String, dynamic>{
       'title': instance.title,
       'list': instance.list,
+      'group': instance.group,
       'zIndex': instance.zIndex,
       'filter': instance.filter,
       'type': instance.$type,

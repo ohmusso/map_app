@@ -469,7 +469,7 @@ mixin _$TileStyleElement {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String title, List<TileStyleElement> list,
-            int? zIndex, List<dynamic>? filter)
+            List<String> group, int? zIndex, List<dynamic>? filter)
         item,
     required TResult Function(String title, List<TileStyleElement> list)
         directory,
@@ -486,8 +486,8 @@ mixin _$TileStyleElement {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(String title, List<TileStyleElement> list, int? zIndex,
-            List<dynamic>? filter)?
+    TResult? Function(String title, List<TileStyleElement> list,
+            List<String> group, int? zIndex, List<dynamic>? filter)?
         item,
     TResult? Function(String title, List<TileStyleElement> list)? directory,
     TResult? Function(
@@ -503,8 +503,8 @@ mixin _$TileStyleElement {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(String title, List<TileStyleElement> list, int? zIndex,
-            List<dynamic>? filter)?
+    TResult Function(String title, List<TileStyleElement> list,
+            List<String> group, int? zIndex, List<dynamic>? filter)?
         item,
     TResult Function(String title, List<TileStyleElement> list)? directory,
     TResult Function(
@@ -591,6 +591,7 @@ abstract class _$$TileStyleItemImplCopyWith<$Res>
   $Res call(
       {String title,
       List<TileStyleElement> list,
+      List<String> group,
       int? zIndex,
       List<dynamic>? filter});
 }
@@ -608,6 +609,7 @@ class __$$TileStyleItemImplCopyWithImpl<$Res>
   $Res call({
     Object? title = null,
     Object? list = null,
+    Object? group = null,
     Object? zIndex = freezed,
     Object? filter = freezed,
   }) {
@@ -620,6 +622,10 @@ class __$$TileStyleItemImplCopyWithImpl<$Res>
           ? _value._list
           : list // ignore: cast_nullable_to_non_nullable
               as List<TileStyleElement>,
+      null == group
+          ? _value._group
+          : group // ignore: cast_nullable_to_non_nullable
+              as List<String>,
       freezed == zIndex
           ? _value.zIndex
           : zIndex // ignore: cast_nullable_to_non_nullable
@@ -638,9 +644,10 @@ class _$TileStyleItemImpl
     with DiagnosticableTreeMixin
     implements TileStyleItem {
   const _$TileStyleItemImpl(this.title, final List<TileStyleElement> list,
-      this.zIndex, final List<dynamic>? filter,
+      final List<String> group, this.zIndex, final List<dynamic>? filter,
       {final String? $type})
       : _list = list,
+        _group = group,
         _filter = filter,
         $type = $type ?? 'item';
 
@@ -655,6 +662,14 @@ class _$TileStyleItemImpl
     if (_list is EqualUnmodifiableListView) return _list;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_list);
+  }
+
+  final List<String> _group;
+  @override
+  List<String> get group {
+    if (_group is EqualUnmodifiableListView) return _group;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_group);
   }
 
   @override
@@ -674,7 +689,7 @@ class _$TileStyleItemImpl
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'TileStyleElement.item(title: $title, list: $list, zIndex: $zIndex, filter: $filter)';
+    return 'TileStyleElement.item(title: $title, list: $list, group: $group, zIndex: $zIndex, filter: $filter)';
   }
 
   @override
@@ -684,6 +699,7 @@ class _$TileStyleItemImpl
       ..add(DiagnosticsProperty('type', 'TileStyleElement.item'))
       ..add(DiagnosticsProperty('title', title))
       ..add(DiagnosticsProperty('list', list))
+      ..add(DiagnosticsProperty('group', group))
       ..add(DiagnosticsProperty('zIndex', zIndex))
       ..add(DiagnosticsProperty('filter', filter));
   }
@@ -695,6 +711,7 @@ class _$TileStyleItemImpl
             other is _$TileStyleItemImpl &&
             (identical(other.title, title) || other.title == title) &&
             const DeepCollectionEquality().equals(other._list, _list) &&
+            const DeepCollectionEquality().equals(other._group, _group) &&
             (identical(other.zIndex, zIndex) || other.zIndex == zIndex) &&
             const DeepCollectionEquality().equals(other._filter, _filter));
   }
@@ -705,6 +722,7 @@ class _$TileStyleItemImpl
       runtimeType,
       title,
       const DeepCollectionEquality().hash(_list),
+      const DeepCollectionEquality().hash(_group),
       zIndex,
       const DeepCollectionEquality().hash(_filter));
 
@@ -718,7 +736,7 @@ class _$TileStyleItemImpl
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String title, List<TileStyleElement> list,
-            int? zIndex, List<dynamic>? filter)
+            List<String> group, int? zIndex, List<dynamic>? filter)
         item,
     required TResult Function(String title, List<TileStyleElement> list)
         directory,
@@ -732,14 +750,14 @@ class _$TileStyleItemImpl
             List<dynamic>? filter)
         layer,
   }) {
-    return item(title, list, zIndex, filter);
+    return item(title, list, group, zIndex, filter);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(String title, List<TileStyleElement> list, int? zIndex,
-            List<dynamic>? filter)?
+    TResult? Function(String title, List<TileStyleElement> list,
+            List<String> group, int? zIndex, List<dynamic>? filter)?
         item,
     TResult? Function(String title, List<TileStyleElement> list)? directory,
     TResult? Function(
@@ -752,14 +770,14 @@ class _$TileStyleItemImpl
             List<dynamic>? filter)?
         layer,
   }) {
-    return item?.call(title, list, zIndex, filter);
+    return item?.call(title, list, group, zIndex, filter);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(String title, List<TileStyleElement> list, int? zIndex,
-            List<dynamic>? filter)?
+    TResult Function(String title, List<TileStyleElement> list,
+            List<String> group, int? zIndex, List<dynamic>? filter)?
         item,
     TResult Function(String title, List<TileStyleElement> list)? directory,
     TResult Function(
@@ -774,7 +792,7 @@ class _$TileStyleItemImpl
     required TResult orElse(),
   }) {
     if (item != null) {
-      return item(title, list, zIndex, filter);
+      return item(title, list, group, zIndex, filter);
     }
     return orElse();
   }
@@ -825,6 +843,7 @@ abstract class TileStyleItem implements TileStyleElement {
   const factory TileStyleItem(
       final String title,
       final List<TileStyleElement> list,
+      final List<String> group,
       final int? zIndex,
       final List<dynamic>? filter) = _$TileStyleItemImpl;
 
@@ -835,6 +854,7 @@ abstract class TileStyleItem implements TileStyleElement {
   String get title;
   @override
   List<TileStyleElement> get list;
+  List<String> get group;
   int? get zIndex;
   List<dynamic>? get filter;
   @override
@@ -946,7 +966,7 @@ class _$TileStyleDirectoryImpl
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String title, List<TileStyleElement> list,
-            int? zIndex, List<dynamic>? filter)
+            List<String> group, int? zIndex, List<dynamic>? filter)
         item,
     required TResult Function(String title, List<TileStyleElement> list)
         directory,
@@ -966,8 +986,8 @@ class _$TileStyleDirectoryImpl
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(String title, List<TileStyleElement> list, int? zIndex,
-            List<dynamic>? filter)?
+    TResult? Function(String title, List<TileStyleElement> list,
+            List<String> group, int? zIndex, List<dynamic>? filter)?
         item,
     TResult? Function(String title, List<TileStyleElement> list)? directory,
     TResult? Function(
@@ -986,8 +1006,8 @@ class _$TileStyleDirectoryImpl
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(String title, List<TileStyleElement> list, int? zIndex,
-            List<dynamic>? filter)?
+    TResult Function(String title, List<TileStyleElement> list,
+            List<String> group, int? zIndex, List<dynamic>? filter)?
         item,
     TResult Function(String title, List<TileStyleElement> list)? directory,
     TResult Function(
@@ -1249,7 +1269,7 @@ class _$TileStyleLayerImpl
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String title, List<TileStyleElement> list,
-            int? zIndex, List<dynamic>? filter)
+            List<String> group, int? zIndex, List<dynamic>? filter)
         item,
     required TResult Function(String title, List<TileStyleElement> list)
         directory,
@@ -1269,8 +1289,8 @@ class _$TileStyleLayerImpl
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(String title, List<TileStyleElement> list, int? zIndex,
-            List<dynamic>? filter)?
+    TResult? Function(String title, List<TileStyleElement> list,
+            List<String> group, int? zIndex, List<dynamic>? filter)?
         item,
     TResult? Function(String title, List<TileStyleElement> list)? directory,
     TResult? Function(
@@ -1290,8 +1310,8 @@ class _$TileStyleLayerImpl
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(String title, List<TileStyleElement> list, int? zIndex,
-            List<dynamic>? filter)?
+    TResult Function(String title, List<TileStyleElement> list,
+            List<String> group, int? zIndex, List<dynamic>? filter)?
         item,
     TResult Function(String title, List<TileStyleElement> list)? directory,
     TResult Function(

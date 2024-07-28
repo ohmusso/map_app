@@ -19,23 +19,31 @@ void main() {
     print(style.list);
   });
 
-  test('read group from json', () async {
-    expect(
-        TileStyleGroup.fromJson(<String, dynamic>{
-          'id': 'back',
-          'title': '道路等より下に描画',
-          'zoom': [1, 2, 3],
-          'filter': [
-            ["==", "line-role", "outline"]
-          ]
-        }),
-        TileStyleGroup(id: 'back', title: '道路等より下に描画', zoom: [
-          1,
-          2,
-          3
-        ], filter: [
-          ['==', "line-role", "outline"]
-        ]));
+  group('style group', () {
+    test('print group', () async {
+      final jsonString = await _loadJsonString('./style/test.json');
+      final json = jsonDecode(jsonString);
+      final style = TileStyle.fromJson(json);
+      print(style.group);
+    });
+    test('read group from json', () async {
+      expect(
+          TileStyleGroup.fromJson(<String, dynamic>{
+            'id': 'back',
+            'title': '道路等より下に描画',
+            'zoom': [1, 2, 3],
+            'filter': [
+              ["==", "line-role", "outline"]
+            ]
+          }),
+          TileStyleGroup(id: 'back', title: '道路等より下に描画', zoom: [
+            1,
+            2,
+            3
+          ], filter: [
+            ['==', "line-role", "outline"]
+          ]));
+    });
   });
 
   test('read directory from json', () async {
@@ -60,6 +68,7 @@ void main() {
                     'filter': ['aaa']
                   }
                 ],
+                'group': ['back'],
                 'zIndex': 10,
                 'filter': [1, 'aaa', 3]
               }
@@ -73,8 +82,9 @@ void main() {
                 'type': 'item',
                 'title': '緑地',
                 'list': [
-                  {'type': 'layer', 'title': '緑地', 'minzoom': 1, 'maxzoom': 10}
-                ]
+                  {'type': 'layer', 'title': '緑地', 'minzoom': 1, 'maxzoom': 10},
+                ],
+                'group': ['front']
               }
             ]
           }
@@ -95,6 +105,7 @@ void main() {
                 ['aaa'],
               )
             ],
+            ['back'],
             10,
             [1, 'aaa', 3],
           )
@@ -113,6 +124,7 @@ void main() {
                 null,
               )
             ],
+            ['front'],
             null,
             null,
           )
@@ -128,11 +140,13 @@ void main() {
           'title': '水域',
           'list': [
             {'type': 'layer', 'title': '水域', 'minzoom': 1, 'maxzoom': 10}
-          ]
+          ],
+          'group': ['back']
         }),
         TileStyleElement.item(
             '水域',
             [TileStyleElement.layer('水域', null, 1, 10, null, null, null)],
+            ['back'],
             null,
             null));
   });

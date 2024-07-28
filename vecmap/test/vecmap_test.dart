@@ -94,6 +94,7 @@ void main() {
   group('DrawStyle fill', () {
     test('new DrawStyl fill', () {
       final DrawStyle style = DrawStyle(
+        [],
         TileStyleDraw(
             type: 'fill',
             visible: true,
@@ -171,6 +172,7 @@ void main() {
 
     test('new DrawStyl line', () {
       final DrawStyle style = DrawStyle(
+        [],
         TileStyleDraw(
             type: 'line',
             visible: true,
@@ -196,8 +198,8 @@ void main() {
       final style = TileStyle.fromJson(json);
 
       final generator = DrawStyleGenerator(style);
-      final drawStyles = generator.genDrawStyles();
-      print(drawStyles);
+      final vecmapDrawStyle = generator.genVecmapDrawStyle();
+      print(vecmapDrawStyle.styles);
     });
 
     test('convert string color', () {
@@ -495,7 +497,7 @@ void main() {
       final json = jsonDecode(jsonString);
       final style = TileStyle.fromJson(json);
       final generator = DrawStyleGenerator(style);
-      final mapDrawStyles = generator.genDrawStyles();
+      final mapDrawStyles = generator.genVecmapDrawStyle().styles;
 
       // read pbf
       File file = File('./11_1796_811.pbf');
@@ -530,7 +532,7 @@ void main() {
       final json = jsonDecode(jsonString);
       final style = TileStyle.fromJson(json);
       final generator = DrawStyleGenerator(style);
-      final mapDrawStyles = generator.genDrawStyles();
+      final mapDrawStyles = generator.genVecmapDrawStyle().styles;
 
       // read pbf
       File file = File('./11_1796_811.pbf');

@@ -26,13 +26,13 @@ Future<Tile> getTileFromPbf(
   return Tile.fromBuffer(byteData.buffer.asUint8List());
 }
 
-Future<Map<String, List<DrawStyle>>> getStyleFromJson(String path) async {
+Future<VecmapDrawStyle> getStyleFromJson(String path) async {
   final jsonString = await rootBundle.loadString('assets/$path');
   final json = jsonDecode(jsonString);
   final style = TileStyle.fromJson(json);
   final generator = DrawStyleGenerator(style);
 
-  return generator.genDrawStyles();
+  return generator.genVecmapDrawStyle();
 }
 
 Future<Map<String, ui.Image>> generateMapIconImage() async {
@@ -66,7 +66,7 @@ class _DemoState extends State<Demo> {
   CustomPainter? painter = null;
   Map<String, ui.Image> _mapIconImage = Map();
 
-  Map<String, List<DrawStyle>> mapDrawStyles = {};
+  VecmapDrawStyle vecmapDrawStyle = VecmapDrawStyle.NoStyle();
   double zoomLevel = 11.0;
 
   Future<void> _fetchPbf() async {
@@ -81,15 +81,34 @@ class _DemoState extends State<Demo> {
     print('read pbf finish');
 
     print('read style');
-    mapDrawStyles = await getStyleFromJson('style/std.json');
+    vecmapDrawStyle = await getStyleFromJson('style/std.json');
 
     print('generate drawer');
-    List<VecmapDrawer> drawers = List.empty(growable: true);
+    final drawersGroup = VecmapDrawersGroup(vecmapDrawStyle.groupIds);
     for (var layer in tile.layers) {
-      drawers.addAll(_genDrawer(layer));
+      final drawStyles = vecmapDrawStyle.styles[layer.name];
+
+      if (drawStyles == null) {
+        continue;
+      }
+
+      for (var feature in layer.features) {
+        final featureTags = genFeatureTags(layer, feature);
+        final styles =
+            getDrawStyles(drawStyles, zoomLevel, feature, featureTags);
+        final commands = GeometryCommand.newCommands(feature.geometry);
+
+        for (var style in styles) {
+          final drawer = _genDrawer(style, commands, featureTags);
+          if (drawer != null) {
+            for (var groupId in style.groupIds)
+              drawersGroup.add(groupId, drawer);
+          }
+        }
+      }
     }
 
-    painter = MyPainter(drawers, vnPosition: vnPosition);
+    painter = MyPainter(drawersGroup, vnPosition: vnPosition);
     vnPosition.value = Offset.zero;
 
     setState(() {});
@@ -104,49 +123,20 @@ class _DemoState extends State<Demo> {
     _mapIconImage = await generateMapIconImage();
   }
 
-  List<VecmapDrawer> _genDrawer(Tile_Layer? layer) {
-    if (layer == null) {
-      return List.empty();
+  VecmapDrawer? _genDrawer(DrawStyle style, List<GeometryCommand> commands,
+      Map<String, Tile_Value> featureTags) {
+    switch (style.drawType) {
+      case 'fill':
+        return VecmapPolygonDrawer(commands, style);
+      case 'line':
+        return VecmapLinestringDrawer(commands, style);
+      case 'symbol':
+        return VecmapPointsDrawer(commands, style, _mapIconImage, featureTags);
+      default:
+        break;
     }
 
-    final drawStyles = mapDrawStyles[layer.name];
-
-    if (drawStyles == null) {
-      return List.empty();
-    }
-
-    List<VecmapDrawer> drawers = List.empty(growable: true);
-    for (var feature in layer.features) {
-      final featureTags = genFeatureTags(layer, feature);
-      final styles = getDrawStyles(drawStyles, zoomLevel, feature, featureTags);
-
-      if (styles.isEmpty) {
-        // style is not found, do not draw
-        // TODO report not found style
-        continue;
-      }
-
-      final commands = GeometryCommand.newCommands(feature.geometry);
-
-      for (var style in styles) {
-        switch (style.drawType) {
-          case 'fill':
-            drawers.add(VecmapPolygonDrawer(commands, style));
-            break;
-          case 'line':
-            drawers.add(VecmapLinestringDrawer(commands, style));
-            break;
-          case 'symbol':
-            drawers.add(VecmapPointsDrawer(
-                commands, style, _mapIconImage, featureTags));
-            break;
-          default:
-            break;
-        }
-      }
-    }
-
-    return drawers;
+    return null;
   }
 
   @override
@@ -350,6 +340,24 @@ class _MapTextPainter {
 
 abstract class VecmapDrawer {
   void vecmapDraw(Canvas canvas);
+}
+
+class VecmapDrawersGroup {
+  final Map<String, List<VecmapDrawer>> group = {};
+
+  /// sorted by drawing order
+  final List<String> groupIds;
+
+  VecmapDrawersGroup(this.groupIds);
+
+  void add(final String groupId, final VecmapDrawer drawer) {
+    if (group.containsKey(groupId)) {
+      group[groupId]!.add(drawer);
+    } else {
+      group[groupId] = List.empty(growable: true);
+      group[groupId]!.add(drawer);
+    }
+  }
 }
 
 /// https://github.com/mapbox/vector-tile-spec/blob/master/2.1/README.md#4352-example-multi-point
@@ -608,10 +616,10 @@ Offset _drawGeoLineTo(Path path, List<Point<int>> cmdParams, Offset offset) {
 }
 
 class MyPainter extends CustomPainter {
-  final List<VecmapDrawer> drawers;
+  final VecmapDrawersGroup drawersGroup;
   final ValueNotifier<Offset> vnPosition;
 
-  MyPainter(this.drawers, {required this.vnPosition})
+  MyPainter(this.drawersGroup, {required this.vnPosition})
       : super(repaint: vnPosition) {
     vnPosition.addListener(() {});
   }
@@ -635,9 +643,17 @@ class MyPainter extends CustomPainter {
 
     canvas.scale(scale, scale);
 
-    // タイルを描画
-    for (var drawer in drawers) {
-      drawer.vecmapDraw(canvas);
+    /// タイルを描画
+    /// groupIdの先頭から描画する。
+    for (var groupId in drawersGroup.groupIds) {
+      final drawers = drawersGroup.group[groupId];
+      if (drawers == null) {
+        continue;
+      }
+
+      for (var drawer in drawers) {
+        drawer.vecmapDraw(canvas);
+      }
     }
 
     canvas.restore();
