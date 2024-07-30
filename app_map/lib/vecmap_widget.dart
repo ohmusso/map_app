@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:latlng/latlng.dart' hide Point;
@@ -57,31 +58,39 @@ class Demo extends StatefulWidget {
   State<Demo> createState() => _DemoState();
 }
 
+const _initZoomLevel = 11.0;
 final beginLatlngAkashi = InputLatLng(34.661791, 135.083908);
 
 class _DemoState extends State<Demo> {
   final ValueNotifier<InputLatLng> vnInputLatLng =
       ValueNotifier<InputLatLng>(beginLatlngAkashi);
-  final ValueNotifier<Offset> vnPosition = ValueNotifier<Offset>(Offset.zero);
+  final ValueNotifier<double> vnZoomLevel =
+      ValueNotifier<double>(_initZoomLevel);
+  final ValueNotifier<MapStatus> vnMapStatus =
+      ValueNotifier<MapStatus>(const MapStatus.init());
   CustomPainter? painter = null;
   Map<String, ui.Image> _mapIconImage = Map();
 
   VecmapDrawStyle vecmapDrawStyle = VecmapDrawStyle.NoStyle();
-  double zoomLevel = 11.0;
+
+  Future<void> _fetchStyle() async {
+    print('read style');
+    vecmapDrawStyle = await getStyleFromJson('style/std.json');
+  }
 
   Future<void> _fetchPbf() async {
     print('read pbf start');
     final lat = vnInputLatLng.value.lat;
     final lng = vnInputLatLng.value.lng;
     final latLng = LatLng.degree(lat, lng);
+    // TODO
+    // final double zoomLevel = vnMapStatus.value.zoomLevel;
+    final double zoomLevel = vnZoomLevel.value;
 
     final tileIndex = _epsg.toTileIndexZoom(latLng, zoomLevel);
     final Tile tile = await getTileFromPbf(
         zoomLevel.floor(), tileIndex.x.floor(), tileIndex.y.floor());
     print('read pbf finish');
-
-    print('read style');
-    vecmapDrawStyle = await getStyleFromJson('style/std.json');
 
     print('generate drawer');
     final drawersGroup = VecmapDrawersGroup(vecmapDrawStyle.groupIds);
@@ -108,14 +117,15 @@ class _DemoState extends State<Demo> {
       }
     }
 
-    painter = MyPainter(drawersGroup, vnPosition: vnPosition);
-    vnPosition.value = Offset.zero;
+    painter = MyPainter(drawersGroup, vnMapStatus: vnMapStatus);
+    vnMapStatus.value = vnMapStatus.value.copyWith(position: Offset.zero);
 
     setState(() {});
   }
 
   Future<void> _init() async {
     await _initMapIcon();
+    await _fetchStyle();
     await _fetchPbf();
   }
 
@@ -142,11 +152,17 @@ class _DemoState extends State<Demo> {
   @override
   void initState() {
     vnInputLatLng.addListener(
-      // when update vnInputLatLng,  call bellow
+      // when update vnInputLatLng, call bellow
       () {
         _fetchPbf();
       },
     );
+
+    vnZoomLevel.addListener(
+        // when update zoomlevel, call bellow
+        () {
+      _fetchPbf();
+    });
 
     _init();
 
@@ -158,10 +174,9 @@ class _DemoState extends State<Demo> {
     return Stack(
       children: [
         const GridWidget(),
-        GestureDetector(
-          onPanUpdate: (details) {
-            vnPosition.value += details.delta;
-          },
+        Listener(
+          onPointerMove: _onPointerMove,
+          onPointerSignal: _onPointerSignal,
           child: SizedBox.expand(
             child: CustomPaint(
               painter: painter,
@@ -173,6 +188,41 @@ class _DemoState extends State<Demo> {
         ),
       ],
     );
+  }
+
+  void _onPointerMove(PointerMoveEvent event) {
+    Offset delta = event.delta;
+    print(delta);
+    final newPosition = vnMapStatus.value.position + delta;
+    final newMapStatus = vnMapStatus.value.copyWith(position: newPosition);
+    vnMapStatus.value = newMapStatus;
+  }
+
+  void _onPointerSignal(PointerSignalEvent event) {
+    const double scaleUnit = 0.1;
+    if (event is PointerScrollEvent) {
+      final deltaY;
+      if (event.scrollDelta.dy > 0) {
+        deltaY = -scaleUnit;
+      } else {
+        deltaY = scaleUnit;
+      }
+
+      final newScale = vnMapStatus.value.scale.update(deltaY);
+
+      if (newScale.value > 1.4) {
+        /// TODO inc zoomlevel
+        print('inc zoomlevel');
+      } else if (newScale.value < 0.3) {
+        /// TODO dec zoomlevel
+        print('dec zoomlevel');
+      } else {
+        /// nop
+      }
+
+      final newMapStatus = vnMapStatus.value.copyWith(scale: newScale);
+      vnMapStatus.value = newMapStatus;
+    }
   }
 }
 
@@ -349,6 +399,7 @@ class VecmapDrawersGroup {
   final List<String> groupIds;
 
   VecmapDrawersGroup(this.groupIds);
+  VecmapDrawersGroup.None() : groupIds = [];
 
   void add(final String groupId, final VecmapDrawer drawer) {
     if (group.containsKey(groupId)) {
@@ -615,13 +666,54 @@ Offset _drawGeoLineTo(Path path, List<Point<int>> cmdParams, Offset offset) {
   return curOffset;
 }
 
-class MyPainter extends CustomPainter {
-  final VecmapDrawersGroup drawersGroup;
-  final ValueNotifier<Offset> vnPosition;
+class MapStatus {
+  final Offset position;
+  final PainterScale scale;
 
-  MyPainter(this.drawersGroup, {required this.vnPosition})
-      : super(repaint: vnPosition) {
-    vnPosition.addListener(() {});
+  const MapStatus({required this.position, required this.scale});
+  const MapStatus.init()
+      : position = Offset.zero,
+        scale = PainterScale.init;
+
+  MapStatus copyWith({Offset? position, PainterScale? scale}) {
+    return MapStatus(
+      position: position ?? this.position,
+      scale: scale ?? this.scale,
+    );
+  }
+}
+
+class PainterScale {
+  static const double max = 1.5;
+  static const double min = 0.2;
+  final double value;
+  const PainterScale(this.value);
+
+  static const init = const PainterScale(0.5);
+
+  PainterScale update(double delta) {
+    final value = this.value + delta;
+
+    if (value < min) {
+      return PainterScale(min);
+    }
+
+    if (value > max) {
+      return PainterScale(max);
+    }
+
+    return PainterScale(value);
+  }
+}
+
+class MyPainter extends CustomPainter {
+  PainterScale scale = PainterScale.init;
+  final VecmapDrawersGroup drawersGroup;
+  final ValueNotifier<MapStatus> vnMapStatus;
+
+  MyPainter(this.drawersGroup, {required this.vnMapStatus})
+      : super(repaint: vnMapStatus) {
+    // vnMapStatus.addListener(() {});
   }
 
   @override
@@ -630,18 +722,19 @@ class MyPainter extends CustomPainter {
     canvas.save();
 
     // タイルを画面収まるように縮小/拡大するため倍率を計算する
-    final double tileSize = 4096.0; // タイル(正方形)の1辺の長さ
-    // final double scale = min(size.width, size.height) / tileSize;
-    final double scale = 0.55;
+    scale = vnMapStatus.value.scale;
 
+    // TODO 原点は画面の中央
     // MAPが画面中央に表示されるように原点を設定する
-    final double offsetTileToCenter = tileSize / 2.0 * scale;
+    final double tileSize = 4096.0; // タイル(正方形)の1辺の長さ
+    final double offsetTileToCenter = tileSize / 2.0 * scale.value;
     canvas.translate((size.width / 2.0) - offsetTileToCenter, 20.0);
 
     // タッチによる移動
-    canvas.translate(vnPosition.value.dx, vnPosition.value.dy);
+    final position = vnMapStatus.value.position;
+    canvas.translate(position.dx, position.dy);
 
-    canvas.scale(scale, scale);
+    canvas.scale(scale.value, scale.value);
 
     /// タイルを描画
     /// groupIdの先頭から描画する。
