@@ -174,12 +174,20 @@ class _DemoState extends State<Demo> {
     return Stack(
       children: [
         const GridWidget(),
+        SizedBox.expand(
+          child: CustomPaint(
+            painter: painter,
+          ),
+        ),
+
+        /// transparent touch area
         Listener(
           onPointerMove: _onPointerMove,
           onPointerSignal: _onPointerSignal,
           child: SizedBox.expand(
-            child: CustomPaint(
-              painter: painter,
+            child: Container(
+              decoration:
+                  BoxDecoration(border: Border.all(color: Colors.white)),
             ),
           ),
         ),
@@ -191,9 +199,11 @@ class _DemoState extends State<Demo> {
   }
 
   void _onPointerMove(PointerMoveEvent event) {
-    Offset delta = event.delta;
-    print(delta);
-    final newPosition = vnMapStatus.value.position + delta;
+    final double scale = vnMapStatus.value.scale.value;
+    final Offset scaledDelta =
+        Offset(event.delta.dx / scale, event.delta.dy / scale);
+
+    final newPosition = vnMapStatus.value.position + scaledDelta;
     final newMapStatus = vnMapStatus.value.copyWith(position: newPosition);
     vnMapStatus.value = newMapStatus;
   }
@@ -209,17 +219,6 @@ class _DemoState extends State<Demo> {
       }
 
       final newScale = vnMapStatus.value.scale.update(deltaY);
-
-      if (newScale.value > 1.4) {
-        /// TODO inc zoomlevel
-        print('inc zoomlevel');
-      } else if (newScale.value < 0.3) {
-        /// TODO dec zoomlevel
-        print('dec zoomlevel');
-      } else {
-        /// nop
-      }
-
       final newMapStatus = vnMapStatus.value.copyWith(scale: newScale);
       vnMapStatus.value = newMapStatus;
     }
@@ -673,7 +672,7 @@ class MapStatus {
   const MapStatus({required this.position, required this.scale});
   const MapStatus.init()
       : position = Offset.zero,
-        scale = PainterScale.init;
+        scale = PainterScale.initScale;
 
   MapStatus copyWith({Offset? position, PainterScale? scale}) {
     return MapStatus(
@@ -686,10 +685,11 @@ class MapStatus {
 class PainterScale {
   static const double max = 1.5;
   static const double min = 0.2;
+  static const double init = 0.5;
   final double value;
   const PainterScale(this.value);
 
-  static const init = const PainterScale(0.5);
+  static const initScale = const PainterScale(0.5);
 
   PainterScale update(double delta) {
     final value = this.value + delta;
@@ -707,7 +707,7 @@ class PainterScale {
 }
 
 class MyPainter extends CustomPainter {
-  PainterScale scale = PainterScale.init;
+  PainterScale scale = PainterScale.initScale;
   final VecmapDrawersGroup drawersGroup;
   final ValueNotifier<MapStatus> vnMapStatus;
 
@@ -726,15 +726,20 @@ class MyPainter extends CustomPainter {
 
     // TODO 原点は画面の中央
     // MAPが画面中央に表示されるように原点を設定する
-    final double tileSize = 4096.0; // タイル(正方形)の1辺の長さ
-    final double offsetTileToCenter = tileSize / 2.0 * scale.value;
-    canvas.translate((size.width / 2.0) - offsetTileToCenter, 20.0);
-
-    // タッチによる移動
-    final position = vnMapStatus.value.position;
-    canvas.translate(position.dx, position.dy);
+    // final double tileSize = 4096.0; // タイル(正方形)の1辺の長さ
+    // final double offsetTileToCenter = tileSize / 2.0 * scale.value;
+    final screenCenterX = (size.width / 2.0);
+    final screenCenterY = (size.height / 2.0);
+    canvas.translate(screenCenterX, screenCenterY);
 
     canvas.scale(scale.value, scale.value);
+
+    // タッチによる移動
+    // scaleが変わったときにポジションの値を変更すると、ズームの中心がずれる
+    final position = vnMapStatus.value.position;
+    final scaledPosX = (position.dx);
+    final scaledPosY = (position.dy);
+    canvas.translate(scaledPosX, scaledPosY);
 
     /// タイルを描画
     /// groupIdの先頭から描画する。
