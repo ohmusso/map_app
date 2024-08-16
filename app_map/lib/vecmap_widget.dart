@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:app_map/controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
@@ -62,10 +63,13 @@ const _initZoomLevel = 11.0;
 final beginLatlngAkashi = InputLatLng(34.661791, 135.083908);
 
 class _DemoState extends State<Demo> {
+  late VecmapController vecmapController;
   final ValueNotifier<InputLatLng> vnInputLatLng =
       ValueNotifier<InputLatLng>(beginLatlngAkashi);
   final ValueNotifier<double> vnZoomLevel =
       ValueNotifier<double>(_initZoomLevel);
+  final ValueNotifier<Offset> vnPositionDelta =
+      ValueNotifier<Offset>(Offset.zero);
   final ValueNotifier<MapStatus> vnMapStatus =
       ValueNotifier<MapStatus>(const MapStatus.init());
   CustomPainter? painter = null;
@@ -118,12 +122,14 @@ class _DemoState extends State<Demo> {
     }
 
     painter = MyPainter(drawersGroup, vnMapStatus: vnMapStatus);
-    vnMapStatus.value = vnMapStatus.value.copyWith(position: Offset.zero);
+    vnMapStatus.value = vnMapStatus.value.copyWith(delta: Offset.zero);
 
     setState(() {});
   }
 
   Future<void> _init() async {
+    vecmapController =
+        VecmapController(vnPositionDelta, vnZoomLevel, vnMapStatus);
     await _initMapIcon();
     await _fetchStyle();
     await _fetchPbf();
@@ -199,28 +205,12 @@ class _DemoState extends State<Demo> {
   }
 
   void _onPointerMove(PointerMoveEvent event) {
-    final double scale = vnMapStatus.value.scale.value;
-    final Offset scaledDelta =
-        Offset(event.delta.dx / scale, event.delta.dy / scale);
-
-    final newPosition = vnMapStatus.value.position + scaledDelta;
-    final newMapStatus = vnMapStatus.value.copyWith(position: newPosition);
-    vnMapStatus.value = newMapStatus;
+    vecmapController.move(event.delta);
   }
 
   void _onPointerSignal(PointerSignalEvent event) {
-    const double scaleUnit = 0.1;
     if (event is PointerScrollEvent) {
-      final deltaY;
-      if (event.scrollDelta.dy > 0) {
-        deltaY = -scaleUnit;
-      } else {
-        deltaY = scaleUnit;
-      }
-
-      final newScale = vnMapStatus.value.scale.update(deltaY);
-      final newMapStatus = vnMapStatus.value.copyWith(scale: newScale);
-      vnMapStatus.value = newMapStatus;
+      vecmapController.zoom(event.scrollDelta);
     }
   }
 }
@@ -666,48 +656,24 @@ Offset _drawGeoLineTo(Path path, List<Point<int>> cmdParams, Offset offset) {
 }
 
 class MapStatus {
-  final Offset position;
-  final PainterScale scale;
+  static const initScale = 0.7;
+  final Offset delta;
+  final double scale;
 
-  const MapStatus({required this.position, required this.scale});
+  const MapStatus({required this.delta, required this.scale});
   const MapStatus.init()
-      : position = Offset.zero,
-        scale = PainterScale.initScale;
+      : delta = Offset.zero,
+        scale = initScale;
 
-  MapStatus copyWith({Offset? position, PainterScale? scale}) {
+  MapStatus copyWith({Offset? delta, double? scale}) {
     return MapStatus(
-      position: position ?? this.position,
+      delta: delta ?? this.delta,
       scale: scale ?? this.scale,
     );
   }
 }
 
-class PainterScale {
-  static const double max = 1.5;
-  static const double min = 0.2;
-  static const double init = 0.5;
-  final double value;
-  const PainterScale(this.value);
-
-  static const initScale = const PainterScale(0.5);
-
-  PainterScale update(double delta) {
-    final value = this.value + delta;
-
-    if (value < min) {
-      return PainterScale(min);
-    }
-
-    if (value > max) {
-      return PainterScale(max);
-    }
-
-    return PainterScale(value);
-  }
-}
-
 class MyPainter extends CustomPainter {
-  PainterScale scale = PainterScale.initScale;
   final VecmapDrawersGroup drawersGroup;
   final ValueNotifier<MapStatus> vnMapStatus;
 
@@ -722,27 +688,25 @@ class MyPainter extends CustomPainter {
     canvas.save();
 
     // タイルを画面収まるように縮小/拡大するため倍率を計算する
-    scale = vnMapStatus.value.scale;
+    final scale = vnMapStatus.value.scale;
 
-    // TODO 原点は画面の中央
-    // MAPが画面中央に表示されるように原点を設定する
+    // 画面の中央の中央でスケールする
     // final double tileSize = 4096.0; // タイル(正方形)の1辺の長さ
     // final double offsetTileToCenter = tileSize / 2.0 * scale.value;
     final screenCenterX = (size.width / 2.0);
     final screenCenterY = (size.height / 2.0);
     canvas.translate(screenCenterX, screenCenterY);
-
-    canvas.scale(scale.value, scale.value);
+    canvas.scale(scale, scale);
 
     // タッチによる移動
-    // scaleが変わったときにポジションの値を変更すると、ズームの中心がずれる
-    final position = vnMapStatus.value.position;
-    final scaledPosX = (position.dx);
-    final scaledPosY = (position.dy);
+    final delta = vnMapStatus.value.delta;
+    final scaledPosX = (delta.dx);
+    final scaledPosY = (delta.dy);
     canvas.translate(scaledPosX, scaledPosY);
 
     /// タイルを描画
     /// groupIdの先頭から描画する。
+    int dbgDrawersCount = 0;
     for (var groupId in drawersGroup.groupIds) {
       final drawers = drawersGroup.group[groupId];
       if (drawers == null) {
@@ -750,9 +714,12 @@ class MyPainter extends CustomPainter {
       }
 
       for (var drawer in drawers) {
+        dbgDrawersCount++;
         drawer.vecmapDraw(canvas);
       }
     }
+
+    print('drawersCount: $dbgDrawersCount');
 
     canvas.restore();
   }
