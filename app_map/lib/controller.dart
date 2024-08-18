@@ -10,12 +10,10 @@ class VecmapController {
   final ValueNotifier<Offset> vnUsrTilePosition;
   final ValueNotifier<double> vnZoomLevel;
   final ValueNotifier<MapStatus> vnMapStatus;
+  final ValueNotifier<InputLatLng> vnInputLatLng;
 
-  VecmapController(
-    this.vnUsrTilePosition,
-    this.vnZoomLevel,
-    this.vnMapStatus,
-  );
+  VecmapController(this.vnUsrTilePosition, this.vnZoomLevel, this.vnMapStatus,
+      this.vnInputLatLng);
 
   void move(Offset delta) {
     final scale = vnMapStatus.value.scale;
@@ -64,6 +62,23 @@ class VecmapController {
     _updateScale(scale);
   }
 
+  void moveToCurLatLng() {
+    const double tileSize = 4096.0;
+    final lat = vnInputLatLng.value.lat;
+    final lng = vnInputLatLng.value.lng;
+    final latLng = LatLng.degree(lat, lng);
+
+    final tileIndex = epsg.toTileIndexZoom(latLng, vnZoomLevel.value);
+    final tilePixelX = tileIndex.x % 1;
+    final tilePixelY = tileIndex.y % 1;
+
+    final newDelta = Offset(tileSize * tilePixelX, tileSize * tilePixelY);
+
+    /// inverse delta to convert camera position.
+    final newMapStatus = vnMapStatus.value.copyWith(delta: -newDelta);
+    vnMapStatus.value = newMapStatus;
+  }
+
   bool _zoomOut() {
     bool isChange = false;
     final double zoomLevel = vnZoomLevel.value;
@@ -76,14 +91,15 @@ class VecmapController {
   }
 
   bool _zoomIn() {
-    bool isChange = false;
     final double zoomLevel = vnZoomLevel.value;
-    if (zoomLevel <= zoomLvMax) {
-      vnZoomLevel.value = zoomLevel + zoomLvUnit;
-      isChange = true;
+
+    if (zoomLevel > zoomLvMax) {
+      return false;
     }
 
-    return isChange;
+    vnZoomLevel.value = zoomLevel + zoomLvUnit;
+
+    return true;
   }
 
   void _updateScale(double scale) {

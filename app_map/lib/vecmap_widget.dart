@@ -17,7 +17,7 @@ import 'input_latlng_widget.dart';
 
 /// package:latlng 地図の空間座標系
 /// 緯度経度から地図の座標を計算したり、その逆を行うために使用する
-final _epsg = EPSG4326();
+final epsg = EPSG4326();
 
 Future<Tile> getTileFromPbf(
   int zoomLevel,
@@ -60,7 +60,7 @@ class Demo extends StatefulWidget {
 }
 
 const _initZoomLevel = 11.0;
-final beginLatlngAkashi = InputLatLng(34.661791, 135.083908);
+final beginLatlngAkashi = InputLatLng(34.634801, 135.033012);
 
 class _DemoState extends State<Demo> {
   late VecmapController vecmapController;
@@ -91,7 +91,7 @@ class _DemoState extends State<Demo> {
     // final double zoomLevel = vnMapStatus.value.zoomLevel;
     final double zoomLevel = vnZoomLevel.value;
 
-    final tileIndex = _epsg.toTileIndexZoom(latLng, zoomLevel);
+    final tileIndex = epsg.toTileIndexZoom(latLng, zoomLevel);
     final Tile tile = await getTileFromPbf(
         zoomLevel.floor(), tileIndex.x.floor(), tileIndex.y.floor());
     print('read pbf finish');
@@ -99,6 +99,7 @@ class _DemoState extends State<Demo> {
     print('generate drawer');
     final drawersGroup = VecmapDrawersGroup(vecmapDrawStyle.groupIds);
     for (var layer in tile.layers) {
+      print('tile size ${layer.extent}');
       final drawStyles = vecmapDrawStyle.styles[layer.name];
 
       if (drawStyles == null) {
@@ -122,14 +123,15 @@ class _DemoState extends State<Demo> {
     }
 
     painter = MyPainter(drawersGroup, vnMapStatus: vnMapStatus);
-    vnMapStatus.value = vnMapStatus.value.copyWith(delta: Offset.zero);
+
+    vecmapController.moveToCurLatLng();
 
     setState(() {});
   }
 
   Future<void> _init() async {
-    vecmapController =
-        VecmapController(vnPositionDelta, vnZoomLevel, vnMapStatus);
+    vecmapController = VecmapController(
+        vnPositionDelta, vnZoomLevel, vnMapStatus, vnInputLatLng);
     await _initMapIcon();
     await _fetchStyle();
     await _fetchPbf();
@@ -213,6 +215,13 @@ class _DemoState extends State<Demo> {
       vecmapController.zoom(event.scrollDelta);
     }
   }
+}
+
+class InputLatLng {
+  final double lat;
+  final double lng;
+
+  InputLatLng(this.lat, this.lng);
 }
 
 class _LineDash {
@@ -700,6 +709,7 @@ class MyPainter extends CustomPainter {
 
     // タッチによる移動
     final delta = vnMapStatus.value.delta;
+    print('delta: $delta, scale: $scale');
     final scaledPosX = (delta.dx);
     final scaledPosY = (delta.dy);
     canvas.translate(scaledPosX, scaledPosY);

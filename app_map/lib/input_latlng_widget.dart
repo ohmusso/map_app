@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-class InputLatLng {
-  final double lat;
-  final double lng;
-
-  InputLatLng(this.lat, this.lng);
-}
+import 'vecmap_widget.dart';
 
 class InputLatlngWidget extends StatefulWidget {
   const InputLatlngWidget({super.key, required this.vnLatLng});
