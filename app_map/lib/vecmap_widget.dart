@@ -60,12 +60,14 @@ class Demo extends StatefulWidget {
 }
 
 const _initZoomLevel = 11.0;
-final beginLatlngAkashi = InputLatLng(34.634801, 135.033012);
+final beginLatlngAkashi = LatLng.degree(34.634801, 135.033012);
+final beginTileIndexlngAkashi =
+    TileIndex(1792.1878015999998, 813.7389852785512);
 
 class _DemoState extends State<Demo> {
   late VecmapController vecmapController;
-  final ValueNotifier<InputLatLng> vnInputLatLng =
-      ValueNotifier<InputLatLng>(beginLatlngAkashi);
+  final ValueNotifier<LatLng> vnLatLng =
+      ValueNotifier<LatLng>(beginLatlngAkashi);
   final ValueNotifier<double> vnZoomLevel =
       ValueNotifier<double>(_initZoomLevel);
   final ValueNotifier<Offset> vnPositionDelta =
@@ -84,8 +86,8 @@ class _DemoState extends State<Demo> {
 
   Future<void> _fetchPbf() async {
     print('read pbf start');
-    final lat = vnInputLatLng.value.lat;
-    final lng = vnInputLatLng.value.lng;
+    final lat = vnLatLng.value.latitude.degrees;
+    final lng = vnLatLng.value.longitude.degrees;
     final latLng = LatLng.degree(lat, lng);
     // TODO
     // final double zoomLevel = vnMapStatus.value.zoomLevel;
@@ -99,7 +101,7 @@ class _DemoState extends State<Demo> {
     print('generate drawer');
     final drawersGroup = VecmapDrawersGroup(vecmapDrawStyle.groupIds);
     for (var layer in tile.layers) {
-      print('tile size ${layer.extent}');
+      // print('tile size ${layer.extent}');
       final drawStyles = vecmapDrawStyle.styles[layer.name];
 
       if (drawStyles == null) {
@@ -124,14 +126,18 @@ class _DemoState extends State<Demo> {
 
     painter = MyPainter(drawersGroup, vnMapStatus: vnMapStatus);
 
-    vecmapController.moveToCurLatLng();
+    vecmapController.moveToCurPos();
 
     setState(() {});
   }
 
   Future<void> _init() async {
     vecmapController = VecmapController(
-        vnPositionDelta, vnZoomLevel, vnMapStatus, vnInputLatLng);
+      vnLatLng,
+      vnZoomLevel,
+      vnMapStatus,
+      beginTileIndexlngAkashi,
+    );
     await _initMapIcon();
     await _fetchStyle();
     await _fetchPbf();
@@ -159,18 +165,20 @@ class _DemoState extends State<Demo> {
 
   @override
   void initState() {
-    vnInputLatLng.addListener(
-      // when update vnInputLatLng, call bellow
+    vnLatLng.addListener(
+      // when update vnLatLng, call bellow
+      // TODO controller update vnLatLng
       () {
-        _fetchPbf();
+        // _fetchPbf();
       },
     );
 
     vnZoomLevel.addListener(
-        // when update zoomlevel, call bellow
-        () {
-      _fetchPbf();
-    });
+      // when update zoomlevel, call bellow
+      () {
+        _fetchPbf();
+      },
+    );
 
     _init();
 
@@ -200,7 +208,8 @@ class _DemoState extends State<Demo> {
           ),
         ),
         InputLatlngWidget(
-          vnLatLng: vnInputLatLng,
+          vnLatLng: vnLatLng,
+          vecmapController: vecmapController,
         ),
       ],
     );
@@ -709,7 +718,7 @@ class MyPainter extends CustomPainter {
 
     // タッチによる移動
     final delta = vnMapStatus.value.delta;
-    print('delta: $delta, scale: $scale');
+    // print('delta: $delta, scale: $scale');
     final scaledPosX = (delta.dx);
     final scaledPosY = (delta.dy);
     canvas.translate(scaledPosX, scaledPosY);
@@ -729,7 +738,7 @@ class MyPainter extends CustomPainter {
       }
     }
 
-    print('drawersCount: $dbgDrawersCount');
+    // print('drawersCount: $dbgDrawersCount');
 
     canvas.restore();
   }

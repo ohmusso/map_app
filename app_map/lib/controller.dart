@@ -6,21 +6,38 @@ class VecmapController {
   static const double zoomLvUnit = 1.0;
   static const double zoomLvMax = 14.0;
   static const double zoomLvMin = 9.0;
+  static const double tileSize = 4096.0;
 
-  final ValueNotifier<Offset> vnUsrTilePosition;
+  final ValueNotifier<LatLng> vnLatLng;
   final ValueNotifier<double> vnZoomLevel;
   final ValueNotifier<MapStatus> vnMapStatus;
-  final ValueNotifier<InputLatLng> vnInputLatLng;
 
-  VecmapController(this.vnUsrTilePosition, this.vnZoomLevel, this.vnMapStatus,
-      this.vnInputLatLng);
+  TileIndex _tileIndex;
 
+  VecmapController(
+    this.vnLatLng,
+    this.vnZoomLevel,
+    this.vnMapStatus,
+    this._tileIndex,
+  );
+
+  /// delta
+  ///  - move left to right: delta.x is minus
+  ///  - move right to left: delta.x is plus
+  ///  - move down to up   : delta.y is minus
+  ///  - move up to down   : delta.y is plus
   void move(Offset delta) {
-    final scale = vnMapStatus.value.scale;
-    final Offset scaledDelta = Offset(delta.dx / scale, delta.dy / scale);
+    final scaledDelta = _newScaledDelta(delta);
     final newDelta = vnMapStatus.value.delta + scaledDelta;
     final newMapStatus = vnMapStatus.value.copyWith(delta: newDelta);
     vnMapStatus.value = newMapStatus;
+
+    // update tileIndex
+    // inverse delta
+    _tileIndex = _addDeltaToTileIndex(-scaledDelta);
+
+    // update latlng
+    vnLatLng.value = epsg.toLatLngZoom(_tileIndex, vnZoomLevel.value);
   }
 
   void zoom(Offset scrollDelta) {
@@ -40,21 +57,27 @@ class VecmapController {
 
     /// zoom out
     if (scale < scaleMin) {
-      final isZoomChange = _zoomOut();
+      final double zoomLevel = vnZoomLevel.value;
 
-      if (isZoomChange) {
+      if (zoomLevel >= zoomLvMin) {
+        _updateTileIndexWhenZoomOut();
+        _zoomOut();
         _updateScale(scaleMax);
       }
+
       return;
     }
 
     /// zoom in
     if (scale > scaleMax) {
-      final isZoomChange = _zoomIn();
+      final double zoomLevel = vnZoomLevel.value;
 
-      if (isZoomChange) {
+      if (zoomLevel <= zoomLvMax) {
+        _updateTileIndexWhenZoomIn();
+        _zoomIn();
         _updateScale(scaleMin);
       }
+
       return;
     }
 
@@ -63,14 +86,13 @@ class VecmapController {
   }
 
   void moveToCurLatLng() {
-    const double tileSize = 4096.0;
-    final lat = vnInputLatLng.value.lat;
-    final lng = vnInputLatLng.value.lng;
+    final lat = vnLatLng.value.latitude.degrees;
+    final lng = vnLatLng.value.longitude.degrees;
     final latLng = LatLng.degree(lat, lng);
 
-    final tileIndex = epsg.toTileIndexZoom(latLng, vnZoomLevel.value);
-    final tilePixelX = tileIndex.x % 1;
-    final tilePixelY = tileIndex.y % 1;
+    final index = epsg.toTileIndexZoom(latLng, vnZoomLevel.value);
+    final tilePixelX = index.x % 1;
+    final tilePixelY = index.y % 1;
 
     final newDelta = Offset(tileSize * tilePixelX, tileSize * tilePixelY);
 
@@ -79,31 +101,59 @@ class VecmapController {
     vnMapStatus.value = newMapStatus;
   }
 
-  bool _zoomOut() {
-    bool isChange = false;
-    final double zoomLevel = vnZoomLevel.value;
-    if (zoomLevel >= zoomLvMin) {
-      vnZoomLevel.value = zoomLevel - zoomLvUnit;
-      isChange = true;
-    }
+  void moveToCurPos() {
+    final tilePixelX = _tileIndex.x % 1;
+    final tilePixelY = _tileIndex.y % 1;
+    print('${_tileIndex.x}, ${_tileIndex.y}');
 
-    return isChange;
+    final newDelta = Offset(tileSize * tilePixelX, tileSize * tilePixelY);
+
+    /// inverse delta to convert camera position.
+    final newMapStatus = vnMapStatus.value.copyWith(delta: -newDelta);
+    vnMapStatus.value = newMapStatus;
   }
 
-  bool _zoomIn() {
+  Offset _newScaledDelta(Offset delta) {
+    final scale = vnMapStatus.value.scale;
+    return Offset(delta.dx / scale, delta.dy / scale);
+  }
+
+  TileIndex _addDeltaToTileIndex(Offset delta) {
+    print(delta);
+    final x = _tileIndex.x + (delta.dx / tileSize);
+    final y = _tileIndex.y + (delta.dy / tileSize);
+    final index = TileIndex(x, y);
+    print('${index.x} ${index.y} ');
+    return index;
+  }
+
+  void _zoomOut() {
     final double zoomLevel = vnZoomLevel.value;
+    vnZoomLevel.value = zoomLevel - zoomLvUnit;
+  }
 
-    if (zoomLevel > zoomLvMax) {
-      return false;
-    }
-
+  void _zoomIn() {
+    final double zoomLevel = vnZoomLevel.value;
     vnZoomLevel.value = zoomLevel + zoomLvUnit;
-
-    return true;
   }
 
   void _updateScale(double scale) {
     final newMapStatus = vnMapStatus.value.copyWith(scale: scale);
     vnMapStatus.value = newMapStatus;
+  }
+
+  void _updateTileIndexWhenZoomIn() {
+    //3584.3756031999997, 1627.4779705571025
+    final double newZoomlevel = vnZoomLevel.value + zoomLvUnit;
+    final latlng = epsg.toLatLngZoom(_tileIndex, vnZoomLevel.value);
+    _tileIndex = epsg.toTileIndexZoom(latlng, newZoomlevel);
+    print('${_tileIndex.x} ${_tileIndex.y}');
+  }
+
+  void _updateTileIndexWhenZoomOut() {
+    final double newZoomlevel = vnZoomLevel.value - zoomLvUnit;
+    final latlng = epsg.toLatLngZoom(_tileIndex, vnZoomLevel.value);
+    _tileIndex = epsg.toTileIndexZoom(latlng, newZoomlevel);
+    print('${_tileIndex.x} ${_tileIndex.y}');
   }
 }
