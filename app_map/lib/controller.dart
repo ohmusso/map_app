@@ -41,12 +41,12 @@ class VecmapController {
   }
 
   void zoom(Offset scrollDelta) {
-    const double scaleUnit = 0.1;
-    const double scaleMax = 1.2;
-    const double scaleMin = 0.2;
+    const double scaleUnit = 0.01;
+    const double scaleMax = 1.1;
+    const double scaleMin = 0.7;
 
     final deltaY;
-    if (scrollDelta.dy > 0) {
+    if (scrollDelta.dy > 0.0) {
       deltaY = -scaleUnit;
     } else {
       deltaY = scaleUnit;
@@ -104,7 +104,6 @@ class VecmapController {
   void moveToCurPos() {
     final tilePixelX = _tileIndex.x % 1;
     final tilePixelY = _tileIndex.y % 1;
-    print('${_tileIndex.x}, ${_tileIndex.y}');
 
     final newDelta = Offset(tileSize * tilePixelX, tileSize * tilePixelY);
 
@@ -119,11 +118,9 @@ class VecmapController {
   }
 
   TileIndex _addDeltaToTileIndex(Offset delta) {
-    print(delta);
     final x = _tileIndex.x + (delta.dx / tileSize);
     final y = _tileIndex.y + (delta.dy / tileSize);
     final index = TileIndex(x, y);
-    print('${index.x} ${index.y} ');
     return index;
   }
 
@@ -147,13 +144,11 @@ class VecmapController {
     final double newZoomlevel = vnZoomLevel.value + zoomLvUnit;
     final latlng = epsg.toLatLngZoom(_tileIndex, vnZoomLevel.value);
     _tileIndex = epsg.toTileIndexZoom(latlng, newZoomlevel);
-    print('${_tileIndex.x} ${_tileIndex.y}');
   }
 
   void _updateTileIndexWhenZoomOut() {
     final double newZoomlevel = vnZoomLevel.value - zoomLvUnit;
     final latlng = epsg.toLatLngZoom(_tileIndex, vnZoomLevel.value);
     _tileIndex = epsg.toTileIndexZoom(latlng, newZoomlevel);
-    print('${_tileIndex.x} ${_tileIndex.y}');
   }
 }
