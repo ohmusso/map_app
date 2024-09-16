@@ -41,9 +41,9 @@ class VecmapController {
   }
 
   void zoom(Offset scrollDelta) {
-    const double scaleUnit = 0.01;
-    const double scaleMax = 1.15;
-    const double scaleMin = 0.85;
+    const double scaleUnit = 0.05;
+    const double scaleMax = 1.0;
+    const double scaleMin = 0.5;
 
     final deltaY;
     if (scrollDelta.dy > 0.0) {

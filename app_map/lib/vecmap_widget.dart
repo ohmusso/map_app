@@ -297,7 +297,12 @@ class _MapTextPainter {
     /// adjust scale of textOffset
     Offset textOffset = Offset.zero;
     textOffset = _addTextOffset(textOffset, drawStyle.textOffset);
-    textOffset = _addDspPos(textOffset, tags['dspPos'], textPainter, image);
+    if (tags['dspPos'] == null) {
+      textOffset = _addDspPos(textOffset, 'CC', textPainter, image);
+    } else {
+      textOffset = _addDspPos(
+          textOffset, tags['dspPos']!.stringValue, textPainter, image);
+    }
 
     return _MapTextPainter._(textPainter, textOffset);
   }
@@ -324,34 +329,29 @@ class _MapTextPainter {
     return offset.translate(textOffset.x, textOffset.y);
   }
 
+  /// dspPos
+  /// RB--CB--LB
+  /// |   |   |
+  /// RC--CC--LC
+  /// |   |   |
+  /// RT--CT--LT
   static Offset _addDspPos(
     Offset offset,
-    Tile_Value? dspPos,
+    String dspPos,
     TextPainter textPainter,
     ui.Image? image,
   ) {
-    if (dspPos == null) {
-      return offset;
-    }
-
     if (image == null) {
       return offset;
     }
 
-    double textWidthHalf = textPainter.width / 2.0;
-    double textHeightHalf = textPainter.height / 2.0;
-    double imageWidth = image.width.toDouble();
-    double imageheight = image.height.toDouble();
-
-    /// dspPos
-    /// RB--CB--LB
-    /// |   |   |
-    /// RC--CC--LC
-    /// |   |   |
-    /// RT--CT--LT
+    final double textWidthHalf = textPainter.width / 2.0;
+    final double textHeightHalf = textPainter.height / 2.0;
+    final double imageWidth = image.width.toDouble();
+    final double imageheight = image.height.toDouble();
     final double dx;
     final double dy;
-    switch (dspPos.stringValue) {
+    switch (dspPos) {
       case 'LT':
         dx = imageWidth;
         dy = imageheight;
@@ -674,7 +674,7 @@ Offset _drawGeoLineTo(Path path, List<Point<int>> cmdParams, Offset offset) {
 }
 
 class MapStatus {
-  static const initScale = 1.0;
+  static const initScale = 0.75;
   final Offset delta;
   final double scale;
 
