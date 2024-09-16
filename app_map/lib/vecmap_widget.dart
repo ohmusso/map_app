@@ -89,13 +89,13 @@ class _DemoState extends State<Demo> {
     final lat = vnLatLng.value.latitude.degrees;
     final lng = vnLatLng.value.longitude.degrees;
     final latLng = LatLng.degree(lat, lng);
-    // TODO
-    // final double zoomLevel = vnMapStatus.value.zoomLevel;
     final double zoomLevel = vnZoomLevel.value;
 
     final tileIndex = epsg.toTileIndexZoom(latLng, zoomLevel);
     final Tile tile = await getTileFromPbf(
         zoomLevel.floor(), tileIndex.x.floor(), tileIndex.y.floor());
+    print('read pbf finish');
+    print('zoomLevel: $zoomLevel');
     print('read pbf finish');
 
     print('generate drawer');
@@ -674,7 +674,7 @@ Offset _drawGeoLineTo(Path path, List<Point<int>> cmdParams, Offset offset) {
 }
 
 class MapStatus {
-  static const initScale = 0.7;
+  static const initScale = 1.0;
   final Offset delta;
   final double scale;
 

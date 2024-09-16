@@ -63,6 +63,8 @@ class TileStyleDraw with _$TileStyleDraw {
     required String type,
     required bool? visible,
     @JsonKey(name: 'source-layer') required String? sourceLayer,
+    required int? minzoom,
+    required int? maxzoom,
     required Map<String, dynamic> info,
     required Map<String, dynamic> draw,
   }) = _TileStyleDraw;
@@ -132,6 +134,8 @@ const defaultDraw = TileStyleDraw(
     type: '*',
     visible: true,
     sourceLayer: '*',
+    minzoom: null,
+    maxzoom: null,
     info: {},
     draw: {'color': 'rgba(0, 0, 0, 1)'});
 

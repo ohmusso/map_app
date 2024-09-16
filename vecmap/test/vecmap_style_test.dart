@@ -183,6 +183,8 @@ void main() {
               type: 'fill',
               visible: true,
               sourceLayer: 'hogehoge',
+              minzoom: null,
+              maxzoom: null,
               info: {},
               draw: {
                 'fill-color': 'red',
@@ -263,6 +265,8 @@ void main() {
             type: 'fill',
             visible: true,
             sourceLayer: 'hogehoge',
+            minzoom: null,
+            maxzoom: null,
             info: {},
             draw: {
               'fill-color': 'red',

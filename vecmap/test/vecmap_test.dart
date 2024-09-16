@@ -99,6 +99,8 @@ void main() {
             type: 'fill',
             visible: true,
             sourceLayer: 'sourceLayer',
+            minzoom: null,
+            maxzoom: null,
             info: {},
             draw: {'fill-color': 'rgb(255,135,75)'}),
         ZoomLevel(1, 10),
@@ -121,6 +123,9 @@ void main() {
         'type': 'line',
         'visible': true,
         'sourceLayer': 'hogehoge',
+        'minzoom': null,
+        'maxzoom': null,
+        'info': Map<String, dynamic>(),
         'draw': {
           'line-color': 'red',
           'line-style': 'line',
@@ -176,6 +181,8 @@ void main() {
         TileStyleDraw(
             type: 'line',
             visible: true,
+            minzoom: null,
+            maxzoom: null,
             sourceLayer: 'sourceLayer',
             info: {},
             draw: {
@@ -316,7 +323,7 @@ void main() {
       ret = exeFilterExpresstion(tags, ["<", "annoCtg", "2902"]);
       expect(ret, true);
 
-      ret = exeFilterExpresstion(tags, [">=", "rtCode1", "40203800002"]);
+      ret = exeFilterExpresstion(tags, [">=", "rtCode1", "40203800001"]);
       expect(ret, true);
     });
 

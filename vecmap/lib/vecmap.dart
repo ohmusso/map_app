@@ -124,6 +124,7 @@ class DrawStyleGenerator {
       for (var layerElement in nameItem.value.list) {
         final layer = layerElement as TileStyleLayer;
         final draws = getTileStyleDrawFromLayer(layer);
+        final layerZoomLevel = ZoomLevel(layer.minzoom, layer.maxzoom);
         String layerName = '';
 
         if (layer.sourceLayer != null) {
@@ -136,15 +137,18 @@ class DrawStyleGenerator {
 
         for (var draw in draws) {
           final String sourceLayer;
+
           if (draw.sourceLayer != null) {
             sourceLayer = draw.sourceLayer!;
           } else {
             sourceLayer = layerName;
           }
 
+          final ZoomLevel zoomLevel =
+              _genZoomLevel(layerZoomLevel, draw.minzoom, draw.maxzoom);
+
           /// add style
           final List<String> groupIds = nameItem.value.group;
-          final ZoomLevel zoomLevel = ZoomLevel(layer.minzoom, layer.maxzoom);
           if (mapDrawStyles.containsKey(sourceLayer)) {
             mapDrawStyles[sourceLayer]!
                 .add(DrawStyle(groupIds, draw, zoomLevel, filter));
@@ -158,6 +162,26 @@ class DrawStyleGenerator {
     }
 
     return mapDrawStyles;
+  }
+
+  static ZoomLevel _genZoomLevel(
+      ZoomLevel layerZoomLevel, int? drawMinzoom, int? drawMaxzoom) {
+    final int minzoom;
+    final int maxzoom;
+
+    if (drawMinzoom == null) {
+      minzoom = layerZoomLevel.minzoom;
+    } else {
+      minzoom = drawMinzoom;
+    }
+
+    if (drawMaxzoom == null) {
+      maxzoom = layerZoomLevel.maxzoom;
+    } else {
+      maxzoom = drawMaxzoom;
+    }
+
+    return ZoomLevel(minzoom, maxzoom);
   }
 }
 

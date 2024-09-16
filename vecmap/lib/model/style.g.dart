@@ -115,6 +115,8 @@ _$TileStyleDrawImpl _$$TileStyleDrawImplFromJson(Map<String, dynamic> json) =>
       type: json['type'] as String,
       visible: json['visible'] as bool?,
       sourceLayer: json['source-layer'] as String?,
+      minzoom: (json['minzoom'] as num?)?.toInt(),
+      maxzoom: (json['maxzoom'] as num?)?.toInt(),
       info: json['info'] as Map<String, dynamic>,
       draw: json['draw'] as Map<String, dynamic>,
     );
@@ -124,6 +126,8 @@ Map<String, dynamic> _$$TileStyleDrawImplToJson(_$TileStyleDrawImpl instance) =>
       'type': instance.type,
       'visible': instance.visible,
       'source-layer': instance.sourceLayer,
+      'minzoom': instance.minzoom,
+      'maxzoom': instance.maxzoom,
       'info': instance.info,
       'draw': instance.draw,
     };
